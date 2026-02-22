@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/creditdb #изменить адрес на свой
+    username: postgres
+    password: postgres #изменить пароль на свой
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8080 #изменить на свой сервис: credit service(8084), info service(8085), core(8081)
