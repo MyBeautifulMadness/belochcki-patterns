@@ -1,0 +1,45 @@
+.profile-form { 
+    margin-top:15px;
+    padding: 15px; 
+    border-radius: 5px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+    width: 70%; 
+} 
+
+.field{
+    font-family: sans-serif; 
+    margin: 0; 
+    display: flex; 
+    flex-direction:row; 
+}
+
+.profile-form label { 
+    width: 25%; 
+    display: block; 
+    margin-bottom: 5px;
+} 
+
+.profile-form input,
+.profile-form select { 
+    width: 75%; 
+    padding: 10px; 
+    margin-bottom: 15px; 
+    background-color: #dddddd;
+    border: 1px solid #ccc; 
+    border-radius: 3px; 
+    box-sizing: border-box; 
+    height: 35px; 
+} 
+
+.profile-form button { 
+    width: 105px; 
+    padding: 10px; 
+    border: none; 
+    border-radius: 3px; 
+    cursor: pointer; 
+    background-color: #1C560A; 
+    color: #fff; 
+    height: 40px; 
+    font-size: 16px; 
+    float: right;
+} 
