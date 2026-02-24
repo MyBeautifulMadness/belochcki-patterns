@@ -28,8 +28,15 @@ public class AuthService {
 
     public AuthResponseDto login(AuthRequestDto dto) {
 
-        Employee employee = employeeRepository.findByLogin(dto.login).orElse(null);
-        if (employee != null && employee.password.equals(dto.password)) {
+        if ("EMPLOYEE".equalsIgnoreCase(dto.userType)) {
+
+            Employee employee = employeeRepository.findByLogin(dto.login)
+                    .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+            if (!employee.password.equals(dto.password)) {
+                throw new RuntimeException("Wrong password");
+            }
+
             String token = jwtService.generateToken(employee.id, employee.login, "EMPLOYEE");
             employee.token = token;
             employeeRepository.save(employee);
@@ -41,8 +48,15 @@ public class AuthService {
             return res;
         }
 
-        Client client = clientRepository.findByLogin(dto.login).orElse(null);
-        if (client != null && client.password.equals(dto.password)) {
+        if ("CLIENT".equalsIgnoreCase(dto.userType)) {
+
+            Client client = clientRepository.findByLogin(dto.login)
+                    .orElseThrow(() -> new RuntimeException("Client not found"));
+
+            if (!client.password.equals(dto.password)) {
+                throw new RuntimeException("Wrong password");
+            }
+
             String token = jwtService.generateToken(client.id, client.login, "CLIENT");
             client.token = token;
             clientRepository.save(client);
@@ -54,7 +68,7 @@ public class AuthService {
             return res;
         }
 
-        throw new RuntimeException("Invalid login or password");
+        throw new RuntimeException("Unknown userType");
     }
 
     public void logout(String token) {
@@ -115,6 +129,23 @@ public class AuthService {
 
         if (client.status == Status.LOCKED) {
             throw new RuntimeException("Client is locked");
+        }
+
+        return true;
+    }
+
+    public boolean validateEmployeeByToken(String token) {
+
+        if (jwtService.isTokenExpired(token)) {
+            logout(token);
+            throw new RuntimeException("Token expired");
+        }
+
+        Employee employee = employeeRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Employee token not found"));
+
+        if (employee.status == Status.LOCKED) {
+            throw new RuntimeException("Employee is locked");
         }
 
         return true;

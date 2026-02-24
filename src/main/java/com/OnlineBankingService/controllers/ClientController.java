@@ -1,5 +1,6 @@
 package com.OnlineBankingService.controllers;
 
+import com.OnlineBankingService.dtos.CreateClientDto;
 import com.OnlineBankingService.entities.Client;
 import com.OnlineBankingService.services.ClientService;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class ClientController {
     }
 
     @PostMapping
-    public Client create(@RequestBody Client client) {
+    public Client create(@RequestBody CreateClientDto client) {
         return clientService.create(client);
     }
 
@@ -43,12 +44,12 @@ public class ClientController {
     }
 
     @PatchMapping("/{id}/lock")
-    public Client lock(@PathVariable UUID id) {
-        return clientService.lock(id);
+    public Client lock(@PathVariable UUID id, @RequestBody String token) {
+        return clientService.lock(id, token);
     }
 
     @PatchMapping("/{id}/unlock")
-    public Client unlock(@PathVariable UUID id) {
-        return clientService.unlock(id);
+    public Client unlock(@PathVariable UUID id, @RequestBody String token) {
+        return clientService.unlock(id,token);
     }
 }

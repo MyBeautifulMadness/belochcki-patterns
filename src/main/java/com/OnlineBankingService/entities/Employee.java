@@ -10,6 +10,9 @@ public class Employee {
     @Id
     public UUID id;
 
+    @Column(nullable = false)
+    public String name;
+
     @Column(unique = true, nullable = false)
     public String login;
 

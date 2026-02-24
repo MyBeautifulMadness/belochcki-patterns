@@ -1,5 +1,6 @@
 package com.OnlineBankingService.services;
 
+import com.OnlineBankingService.dtos.CreateEmployeeDto;
 import com.OnlineBankingService.entities.Employee;
 import com.OnlineBankingService.entities.Status;
 import com.OnlineBankingService.repositories.EmployeeRepository;
@@ -12,9 +13,11 @@ import java.util.UUID;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final AuthService authService;
 
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    public EmployeeService(EmployeeRepository employeeRepository, AuthService authService) {
         this.employeeRepository = employeeRepository;
+        this.authService = authService;
     }
 
     public List<Employee> findAll() {
@@ -26,8 +29,12 @@ public class EmployeeService {
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
     }
 
-    public Employee create(Employee employee) {
+    public Employee create(CreateEmployeeDto dto) {
+        Employee employee = new Employee();
         employee.id = UUID.randomUUID();
+        employee.name = dto.name;
+        employee.login = dto.login;
+        employee.password = dto.password;
         employee.status = Status.UNLOCKED;
         return employeeRepository.save(employee);
     }
@@ -44,13 +51,15 @@ public class EmployeeService {
         employeeRepository.deleteById(id);
     }
 
-    public Employee lock(UUID id) {
+    public Employee lock(UUID id, String token) {
+        authService.validateEmployeeByToken(token);
         Employee employee = findById(id);
         employee.status = Status.LOCKED;
         return employeeRepository.save(employee);
     }
 
-    public Employee unlock(UUID id) {
+    public Employee unlock(UUID id, String token) {
+        authService.validateEmployeeByToken(token);
         Employee employee = findById(id);
         employee.status = Status.UNLOCKED;
         return employeeRepository.save(employee);

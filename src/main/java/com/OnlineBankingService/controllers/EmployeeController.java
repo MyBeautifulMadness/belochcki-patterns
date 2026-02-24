@@ -1,5 +1,6 @@
 package com.OnlineBankingService.controllers;
 
+import com.OnlineBankingService.dtos.CreateEmployeeDto;
 import com.OnlineBankingService.entities.Employee;
 import com.OnlineBankingService.services.EmployeeService;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public Employee create(@RequestBody Employee employee) {
+    public Employee create(@RequestBody CreateEmployeeDto employee) {
         return employeeService.create(employee);
     }
 
@@ -43,12 +44,12 @@ public class EmployeeController {
     }
 
     @PatchMapping("/{id}/lock")
-    public Employee lock(@PathVariable UUID id) {
-        return employeeService.lock(id);
+    public Employee lock(@PathVariable UUID id, @RequestBody String token) {
+        return employeeService.lock(id, token);
     }
 
     @PatchMapping("/{id}/unlock")
-    public Employee unlock(@PathVariable UUID id) {
-        return employeeService.unlock(id);
+    public Employee unlock(@PathVariable UUID id, @RequestBody String token) {
+        return employeeService.unlock(id, token);
     }
 }
