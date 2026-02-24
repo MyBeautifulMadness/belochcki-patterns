@@ -1,0 +1,20 @@
+package com.OnlineBankingService.service;
+
+import com.OnlineBankingService.entity.dto.AuthValidationRequest;
+import com.OnlineBankingService.entity.dto.ClientCreditResponse;
+import com.OnlineBankingService.entity.dto.CreateClientCreditRequest;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
+public interface ClientCreditService {
+
+    ClientCreditResponse createClientCredit(CreateClientCreditRequest request);
+
+    List<ClientCreditResponse> getAllClientCredit(UUID clientId, UUID creditTariffId, BigDecimal creditAmountFrom, BigDecimal creditAmountTo, BigDecimal debtAmountFrom, BigDecimal debtAmountTo, String creditStatus, String sortBy, String direction);
+
+    ClientCreditResponse getByIdClientCredit(UUID id);
+
+    List<ClientCreditResponse> getCurrentClientCredit(AuthValidationRequest request);
+}

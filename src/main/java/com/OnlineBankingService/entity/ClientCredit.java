@@ -1,5 +1,7 @@
 package com.OnlineBankingService.entity;
 
+import com.OnlineBankingService.entity.enums.CreditStatus;
+import com.OnlineBankingService.entity.enums.OperationType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,4 +35,10 @@ public class ClientCredit {
     private LocalTime issueTime;
     private BigDecimal creditAmount;
     private BigDecimal debtAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "credit_status", nullable = false)
+    private CreditStatus creditStatus;
+
+    private LocalDate lastPaymentDate;
 }

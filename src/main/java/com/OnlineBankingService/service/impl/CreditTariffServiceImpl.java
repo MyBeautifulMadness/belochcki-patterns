@@ -6,8 +6,11 @@ import com.OnlineBankingService.entity.dto.CreditTariffResponse;
 import com.OnlineBankingService.repository.CreditTariffRepository;
 import com.OnlineBankingService.service.CreditTariffService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,9 +48,44 @@ public class CreditTariffServiceImpl implements CreditTariffService {
     }
 
     @Override
-    public  List<CreditTariffResponse> getAllCreditTariff(){
+    public List<CreditTariffResponse> getAllCreditTariff(String name, String description, BigDecimal amountFrom, BigDecimal amountTo, BigDecimal interestRate, String sortBy, String direction){
 
-        return creditTariffRepository.findAll()
+        Specification<CreditTariff> spec = (root, query, cb) -> {
+
+            var predicate = cb.conjunction();
+            if (name != null) {
+                predicate = cb.and(predicate, cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            }
+
+            if (description != null) {
+                predicate = cb.and(predicate, cb.like(cb.lower(root.get("description")), "%" + description.toLowerCase() + "%"));
+            }
+
+            if (amountFrom != null) {
+                predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get("amountFrom"), amountFrom));
+            }
+
+            if (amountTo != null) {
+                predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get("amountTo"), amountTo));
+            }
+
+            if (interestRate != null) {
+                predicate = cb.and(predicate, cb.equal(root.get("interestRate"), interestRate));
+            }
+
+            return predicate;
+        };
+
+        Sort sort = Sort.unsorted();
+
+        if (sortBy != null && !sortBy.isBlank()) {
+
+            Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+            sort = Sort.by(sortDirection, sortBy);
+        }
+
+        return creditTariffRepository
+                .findAll(spec, sort)
                 .stream()
                 .map(creditTariff -> CreditTariffResponse.builder()
                         .id(creditTariff.getId())

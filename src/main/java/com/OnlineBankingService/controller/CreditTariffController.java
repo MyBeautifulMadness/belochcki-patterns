@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,8 +30,11 @@ public class CreditTariffController {
     }
 
     @GetMapping("/getAll")
-    public List<CreditTariffResponse> getAll(){
-        return service.getAllCreditTariff();
+    public List<CreditTariffResponse> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) String description,
+                                             @RequestParam(required = false) BigDecimal amountFrom, @RequestParam(required = false) BigDecimal amountTo,
+                                             @RequestParam(required = false) BigDecimal interestRate, @RequestParam(required = false) String sortBy,
+                                             @RequestParam(defaultValue = "asc") String direction){
+        return service.getAllCreditTariff(name, description, amountFrom, amountTo, interestRate, sortBy, direction);
     }
 
     @GetMapping("/getById/{id}")
