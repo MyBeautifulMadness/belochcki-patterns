@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-public record DebitAccountDto(
+public record AccountDto(
         UUID id,
         Long clientId,
         LocalDate createdDate,
