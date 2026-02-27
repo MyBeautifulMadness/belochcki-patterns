@@ -2,13 +2,16 @@ package com.OnlineBankingService.service.impl;
 
 import com.OnlineBankingService.config.RestTemplateConfig;
 import com.OnlineBankingService.entity.ClientCredit;
+import com.OnlineBankingService.entity.CreditOperationHistory;
 import com.OnlineBankingService.entity.CreditTariff;
 import com.OnlineBankingService.entity.dto.AuthValidationRequest;
 import com.OnlineBankingService.entity.dto.ClientCreditResponse;
 import com.OnlineBankingService.entity.dto.CreateClientCreditRequest;
 import com.OnlineBankingService.entity.dto.RepayCreditRequest;
 import com.OnlineBankingService.entity.enums.CreditStatus;
+import com.OnlineBankingService.entity.enums.OperationType;
 import com.OnlineBankingService.repository.ClientCreditRepository;
+import com.OnlineBankingService.repository.CreditOperationHistoryRepository;
 import com.OnlineBankingService.repository.CreditTariffRepository;
 import com.OnlineBankingService.service.ClientCreditService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
     private final ClientCreditRepository clientCreditRepository;
     private final CreditTariffRepository creditTariffRepository;
     private final RestTemplateConfig restTemplateConfig;
+    private final CreditOperationHistoryRepository creditOperationHistoryRepository;
 
     @Override
     public ClientCreditResponse createClientCredit(CreateClientCreditRequest request){
@@ -71,6 +75,17 @@ public class ClientCreditServiceImpl implements ClientCreditService {
                 .build();
 
         ClientCredit result = clientCreditRepository.save(credit);
+
+        CreditOperationHistory history = CreditOperationHistory.builder()
+                .clientCreditId(result)
+                .date(result.getIssueData())
+                .time(result.getIssueTime())
+                .amount(result.getCreditAmount())
+                .comment("Кредит " + result.getId() + " создан на сумму " + result.getCreditAmount())
+                .operationType(OperationType.ISSUANCE)
+                .build();
+
+        creditOperationHistoryRepository.save(history);
 
         return ClientCreditResponse.builder()
                 .id(result.getId())
@@ -245,10 +260,33 @@ public class ClientCreditServiceImpl implements ClientCreditService {
         if (newDebt.compareTo(BigDecimal.ZERO) <= 0 ){
             credit.setDebtAmount(BigDecimal.ZERO);
             credit.setCreditStatus(CreditStatus.CLOSED);
+
+            CreditOperationHistory closingHistory = CreditOperationHistory.builder()
+                    .clientCreditId(credit)
+                    .date(LocalDate.now())
+                    .time(LocalTime.now())
+                    .amount(BigDecimal.ZERO)
+                    .comment("Кредит " + credit.getId() + " полностью погашен")
+                    .operationType(OperationType.CLOSING)
+                    .build();
+
+            creditOperationHistoryRepository.save(closingHistory);
+
         } else {
             credit.setDebtAmount(newDebt);
         }
 
         clientCreditRepository.save(credit);
+
+        CreditOperationHistory history = CreditOperationHistory.builder()
+                .clientCreditId(credit)
+                .date(LocalDate.now())
+                .time(LocalTime.now())
+                .amount(request.getAmount())
+                .comment("Кредит " + credit.getId() + " пополнен на сумму " + request.getAmount())
+                .operationType(OperationType.REPAYMENT)
+                .build();
+
+        creditOperationHistoryRepository.save(history);
     }
 }
