@@ -6,6 +6,7 @@ import com.OnlineBankingService.entity.CreditTariff;
 import com.OnlineBankingService.entity.dto.AuthValidationRequest;
 import com.OnlineBankingService.entity.dto.ClientCreditResponse;
 import com.OnlineBankingService.entity.dto.CreateClientCreditRequest;
+import com.OnlineBankingService.entity.dto.RepayCreditRequest;
 import com.OnlineBankingService.entity.enums.CreditStatus;
 import com.OnlineBankingService.repository.ClientCreditRepository;
 import com.OnlineBankingService.repository.CreditTariffRepository;
@@ -13,16 +14,15 @@ import com.OnlineBankingService.service.ClientCreditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -49,14 +49,14 @@ public class ClientCreditServiceImpl implements ClientCreditService {
         ResponseEntity<Boolean> response = restTemplateConfig.restTemplate().postForEntity("http://localhost:8085/api/auth/validate-client", entity, Boolean.class);
 
         if (!response.getStatusCode().is2xxSuccessful() || Boolean.FALSE.equals(response.getBody())) {
-            throw new RuntimeException("Ошибка при проверке клиента");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при проверке клиента");
         }
 
-        CreditTariff tariff = creditTariffRepository.findById(request.getCreditTariffId()).orElseThrow(() -> new RuntimeException("Данный кредитный тариф не найден"));
+        CreditTariff tariff = creditTariffRepository.findById(request.getCreditTariffId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Данный кредитный тариф не найден"));
 
         BigDecimal amount = request.getCreditAmount();
         if (amount.compareTo(tariff.getAmountFrom()) < 0 || amount.compareTo(tariff.getAmountTo()) > 0){
-            throw new RuntimeException("Указанная сумма кредита не входит в диапазон выбранного тарифа");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Указанная сумма кредита не входит в диапазон выбранного тарифа");
         }
 
         ClientCredit credit = ClientCredit.builder()
@@ -151,7 +151,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
     @Override
     public ClientCreditResponse getByIdClientCredit(UUID id){
 
-        ClientCredit credit = clientCreditRepository.findById(id).orElseThrow(() -> new RuntimeException("Данный кредит не найден"));
+        ClientCredit credit = clientCreditRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Данный кредит не найден"));
 
         return ClientCreditResponse.builder()
                 .id(credit.getId())
@@ -180,7 +180,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
         ResponseEntity<Boolean> response = restTemplateConfig.restTemplate().postForEntity("http://localhost:8085/api/auth/validate-client", entity, Boolean.class);
 
         if (!response.getStatusCode().is2xxSuccessful() || Boolean.FALSE.equals(response.getBody())) {
-            throw new RuntimeException("Ошибка при проверке клиента");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при проверке клиента");
         }
 
         return clientCreditRepository.findByClientId(request.getClientId())
@@ -197,5 +197,58 @@ public class ClientCreditServiceImpl implements ClientCreditService {
                         .lastPaymentDate(credit.getLastPaymentDate())
                         .build())
                 .toList();
+    }
+
+
+    @Override
+    public void repayCredit(RepayCreditRequest request){
+
+        AuthValidationRequest authValidationRequest = AuthValidationRequest.builder().token(request.getToken()).clientId(request.getClientId()).build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<AuthValidationRequest> entity = new HttpEntity<>(authValidationRequest, headers);
+
+        ResponseEntity<Boolean> response = restTemplateConfig.restTemplate().postForEntity("http://localhost:8085/api/auth/validate-client", entity, Boolean.class);
+
+        if (!response.getStatusCode().is2xxSuccessful() || Boolean.FALSE.equals(response.getBody())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при проверке клиента");
+        }
+
+        ClientCredit credit = clientCreditRepository.findById(request.getCreditId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Данный кредит не найден"));
+
+//        if (!credit.getClientId().equals(request.getClientId())) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Кредит не принадлежит данному клиенту");
+//        }
+
+        if (credit.getCreditStatus() == CreditStatus.CLOSED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Кредит уже закрыт");
+        }
+
+        if (request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сумма должна быть больше 0");
+        }
+
+        Map<String, Object> withdrawBody = Map.of("amount", request.getAmount(), "comment", "Погашение кредита " + request.getCreditId());
+
+        ResponseEntity<Void> withdrawResponse  = restTemplateConfig.restTemplate().postForEntity("http://localhost:8081/api/core/debit-accounts/" + request.getDebitAccountId() + "/withdraw", withdrawBody, Void.class);
+
+        if (!withdrawResponse.getStatusCode().is2xxSuccessful()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка списания средств с дебетого счета");
+        }
+
+        BigDecimal newDebt = credit.getDebtAmount().subtract(request.getAmount());
+
+        credit.setLastPaymentDate(LocalDate.now());
+
+        if (newDebt.compareTo(BigDecimal.ZERO) <= 0 ){
+            credit.setDebtAmount(BigDecimal.ZERO);
+            credit.setCreditStatus(CreditStatus.CLOSED);
+        } else {
+            credit.setDebtAmount(newDebt);
+        }
+
+        clientCreditRepository.save(credit);
     }
 }

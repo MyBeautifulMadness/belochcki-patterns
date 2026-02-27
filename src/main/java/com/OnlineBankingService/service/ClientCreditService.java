@@ -3,6 +3,7 @@ package com.OnlineBankingService.service;
 import com.OnlineBankingService.entity.dto.AuthValidationRequest;
 import com.OnlineBankingService.entity.dto.ClientCreditResponse;
 import com.OnlineBankingService.entity.dto.CreateClientCreditRequest;
+import com.OnlineBankingService.entity.dto.RepayCreditRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,4 +18,6 @@ public interface ClientCreditService {
     ClientCreditResponse getByIdClientCredit(UUID id);
 
     List<ClientCreditResponse> getCurrentClientCredit(AuthValidationRequest request);
+
+    void repayCredit(RepayCreditRequest request);
 }

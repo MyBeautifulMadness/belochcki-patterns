@@ -2,6 +2,7 @@ package com.OnlineBankingService.config;
 
 import com.OnlineBankingService.entity.ClientCredit;
 import com.OnlineBankingService.entity.CreditTariff;
+import com.OnlineBankingService.entity.enums.CreditStatus;
 import com.OnlineBankingService.repository.ClientCreditRepository;
 import com.OnlineBankingService.repository.CreditTariffRepository;
 import jakarta.transaction.Transactional;
@@ -28,7 +29,7 @@ public class AccrualInterestForCreditService {
 
         //log.info("Началось начисление процентов по кредиту");
 
-        List<ClientCredit> credits = clientCreditRepository.findAll();
+        List<ClientCredit> credits = clientCreditRepository.findAllByCreditStatus(CreditStatus.OPEN);
 
         for (ClientCredit credit : credits){
 

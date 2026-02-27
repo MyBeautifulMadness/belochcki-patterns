@@ -3,9 +3,11 @@ package com.OnlineBankingService.controller;
 import com.OnlineBankingService.entity.dto.AuthValidationRequest;
 import com.OnlineBankingService.entity.dto.ClientCreditResponse;
 import com.OnlineBankingService.entity.dto.CreateClientCreditRequest;
+import com.OnlineBankingService.entity.dto.RepayCreditRequest;
 import com.OnlineBankingService.service.ClientCreditService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -41,5 +43,11 @@ public class ClientCreditController {
     @PostMapping("/getCurrentClientCredit")
     public List<ClientCreditResponse> getCurrentClientCredit(@RequestBody @Valid AuthValidationRequest request){
         return service.getCurrentClientCredit(request);
+    }
+
+    @PostMapping("/repay")
+    public ResponseEntity<String> repay(@RequestBody RepayCreditRequest request) {
+        service.repayCredit(request);
+        return ResponseEntity.ok("Кредит успешно погашен");
     }
 }

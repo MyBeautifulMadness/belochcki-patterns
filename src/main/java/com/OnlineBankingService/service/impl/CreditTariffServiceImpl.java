@@ -8,7 +8,9 @@ import com.OnlineBankingService.service.CreditTariffService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -101,7 +103,7 @@ public class CreditTariffServiceImpl implements CreditTariffService {
     @Override
     public CreditTariffResponse getByIdCreditTariff(UUID id){
 
-        CreditTariff creditTariff = creditTariffRepository.findById(id).orElseThrow(() -> new RuntimeException("Данного Кредитного тарифа не существует"));
+        CreditTariff creditTariff = creditTariffRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Данного Кредитного тарифа не существует"));
 
         return CreditTariffResponse.builder()
                 .id(creditTariff.getId())
@@ -116,7 +118,7 @@ public class CreditTariffServiceImpl implements CreditTariffService {
     @Override
     public CreditTariffResponse updateCreditTariff(UUID id, CreditTariffRequest request){
 
-        CreditTariff creditTariff = creditTariffRepository.findById(id).orElseThrow(() -> new RuntimeException("Данного Кредитного тарифа не существует"));
+        CreditTariff creditTariff = creditTariffRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Данного Кредитного тарифа не существует"));
 
         creditTariff.setName(request.getName());
         creditTariff.setDescription(request.getDescription());
