@@ -112,7 +112,7 @@ public class DebitAccountServiceImpl implements DebitAccountService {
     @Override
     @Transactional
     public DebitAccountResponse close(UUID accountId, UUID clientId) {
-        Long closedId = accountRepository.closeIfZeroBalance(accountId, clientId);
+        UUID closedId = accountRepository.closeIfZeroBalance(accountId, clientId);
         if (closedId == null) {
             ensureAccountAccessible(clientId, accountId);
             throw new ConflictException("Account must be OPEN and have zero balance to close");

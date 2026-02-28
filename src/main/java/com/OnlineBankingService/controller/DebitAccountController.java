@@ -21,23 +21,23 @@ import java.util.UUID;
 public class DebitAccountController {
     private final DebitAccountService service;
 
-    @PostMapping("/debit-accounts")
+    @PostMapping("/clients/{clientId}/debit-accounts")
     public DebitAccountResponse open(@PathVariable UUID clientId) {
         return service.open(clientId);
     }
 
-    @PostMapping("/debit-accounts/{accountId}/deposit")
-    public DebitAccountResponse deposit(@PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request, @RequestBody UUID clientId) {
+    @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/deposit")
+    public DebitAccountResponse deposit(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request) {
         return service.deposit(accountId, request, clientId);
     }
 
-    @PostMapping("/debit-accounts/{accountId}/withdraw")
-    public DebitAccountResponse withdraw(@PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request, @RequestBody UUID clientId) {
+    @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/withdraw")
+    public DebitAccountResponse withdraw(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request) {
         return service.withdraw(accountId, request, clientId);
     }
 
-    @PostMapping("/debit-accounts/{accountId}/close")
-    public DebitAccountResponse close(@PathVariable UUID accountId, @RequestBody UUID clientId) {
+    @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/close")
+    public DebitAccountResponse close(@PathVariable UUID clientId, @PathVariable UUID accountId) {
         return service.close(accountId, clientId);
     }
 
@@ -46,9 +46,10 @@ public class DebitAccountController {
         return service.getByClient(clientId);
     }
 
-    @GetMapping("/debit-accounts/{accountId}/operations")
-    public Page<AccountOperationResponse> operations(@PathVariable UUID accountId, Pageable pageable,
-                                                     @PathVariable UUID clientId, Role role, AccountType accountType) {
+    @GetMapping("/clients/{clientId}/accounts/{accountId}/operations")
+    public Page<AccountOperationResponse> operations(@PathVariable UUID clientId, @PathVariable UUID accountId,
+                                                     Pageable pageable,
+                                                     @RequestParam Role role, @RequestParam AccountType accountType) {
         return service.getOperations(accountId, pageable, clientId, role, accountType);
     }
 

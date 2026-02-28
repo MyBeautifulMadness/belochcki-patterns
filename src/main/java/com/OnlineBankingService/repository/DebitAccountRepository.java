@@ -35,10 +35,11 @@ public interface DebitAccountRepository extends JpaRepository<DebitAccount, UUID
       UPDATE debit_account
       SET status = 'CLOSED'
       WHERE id = :id
+        AND client_id = :clientId
         AND status = 'OPEN'
         AND balance = 0
       RETURNING id
       """, nativeQuery = true)
-    Long closeIfZeroBalance(@Param("id") UUID id,
+    UUID closeIfZeroBalance(@Param("id") UUID id,
                             @Param("clientId") UUID clientId);
 }
