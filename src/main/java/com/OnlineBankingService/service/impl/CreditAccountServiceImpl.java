@@ -2,6 +2,7 @@ package com.OnlineBankingService.service.impl;
 
 import com.OnlineBankingService.domain.AccountStatus;
 import com.OnlineBankingService.domain.OperationType;
+import com.OnlineBankingService.domain.Role;
 import com.OnlineBankingService.dto.*;
 import com.OnlineBankingService.entity.AccountOperation;
 import com.OnlineBankingService.entity.CreditAccount;
@@ -32,6 +33,23 @@ public class CreditAccountServiceImpl implements CreditAccountService {
     private final CreditAccountRepository accountRepository;
     private final AccountOperationRepository operationRepository;
     private final AccountNameGenerator nameGenerator;
+
+    @Override
+    @Transactional(readOnly = true)
+    public CreditAccountResponse getById(UUID clientId, UUID accountId, Role role) {
+        var acc = accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Credit account not found: " + accountId));
+
+        if (role == Role.EMPLOYEE) {
+            return toResponse(acc);
+        }
+
+        if (!acc.getClientId().equals(clientId)) {
+            throw new ForbiddenException("You cannot access this credit account");
+        }
+
+        return toResponse(acc);
+    }
 
     @Transactional
     public CreditAccountResponse withdraw(UUID clientId,

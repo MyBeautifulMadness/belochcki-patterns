@@ -1,6 +1,7 @@
 package com.OnlineBankingService.service;
 
 
+import com.OnlineBankingService.domain.Role;
 import com.OnlineBankingService.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,4 +20,6 @@ public interface CreditAccountService {
     CreditAccountResponse onCreditIssued(CreditIssuedRequest request);
 
     CreditAccountResponse closeByCreditService(UUID clientId);
+
+    CreditAccountResponse getById(UUID clientId, UUID accountId, Role role);
 }

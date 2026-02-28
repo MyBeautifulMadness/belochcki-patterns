@@ -76,6 +76,21 @@ public class DebitAccountServiceImpl implements DebitAccountService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public DebitAccountResponse getById(UUID clientId, UUID accountId, Role role) {
+        if (role == Role.EMPLOYEE) {
+            var acc = accountRepository.findById(accountId)
+                    .orElseThrow(() -> new NotFoundException("Debit account not found: " + accountId));
+            return toResponse(acc);
+        }
+
+        ensureAccountAccessible(clientId, accountId);
+        var acc = accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Debit account not found: " + accountId));
+        return toResponse(acc);
+    }
+
+    @Override
     @Transactional
     public DebitAccountResponse deposit(UUID accountId, MoneyRequest request, UUID clientId) {
         BigDecimal delta = normalizeAmount(request.amount());

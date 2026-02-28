@@ -23,4 +23,6 @@ public interface DebitAccountService {
     Page<AccountOperationResponse> getOperations(UUID accountId, Pageable pageable, UUID clientId, Role role, AccountType accountType);
 
     DebitAccountResponse withdrawByCreditService(UUID debitAccountId, CreditServiceWithdrawRequest request, UUID clientId);
+
+    DebitAccountResponse getById(UUID clientId, UUID accountId, Role role);
 }

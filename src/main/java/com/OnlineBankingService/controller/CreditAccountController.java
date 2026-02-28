@@ -1,5 +1,6 @@
 package com.OnlineBankingService.controller;
 
+import com.OnlineBankingService.domain.Role;
 import com.OnlineBankingService.dto.*;
 import com.OnlineBankingService.service.CreditAccountService;
 import jakarta.validation.Valid;
@@ -17,6 +18,11 @@ import java.util.UUID;
 public class CreditAccountController {
 
     private final CreditAccountService service;
+
+    @GetMapping("/clients/{clientId}/credit-accounts/{accountId}")
+    public CreditAccountResponse getById(@PathVariable UUID clientId, @PathVariable UUID accountId, @RequestParam Role role) {
+        return service.getById(clientId, accountId, role);
+    }
 
     @GetMapping("/clients/{clientId}/credit-account")
     public CreditAccountResponse getMyCreditAccount(@PathVariable UUID clientId) {

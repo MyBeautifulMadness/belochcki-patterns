@@ -21,6 +21,11 @@ import java.util.UUID;
 public class DebitAccountController {
     private final DebitAccountService service;
 
+    @GetMapping("/clients/{clientId}/debit-accounts/{accountId}")
+    public DebitAccountResponse getById(@PathVariable UUID clientId, @PathVariable UUID accountId, @RequestParam Role role) {
+        return service.getById(clientId, accountId, role);
+    }
+
     @PostMapping("/clients/{clientId}/debit-accounts")
     public DebitAccountResponse open(@PathVariable UUID clientId) {
         return service.open(clientId);
