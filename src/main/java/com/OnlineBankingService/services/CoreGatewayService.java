@@ -31,36 +31,41 @@ public class CoreGatewayService {
 
     public AccountDto closeAccount(String token, UUID clientId, UUID accountId) {
         authService.validateTokenForClient(token, clientId);
-        return coreClient.closeAccount(accountId, clientId);
+        return coreClient.closeAccount(clientId, accountId);
     }
 
     public AccountDto deposit(String token, UUID clientId, UUID accountId, MoneyRequest request) {
         authService.validateTokenForClient(token, clientId);
-        return coreClient.deposit(accountId, request, clientId);
+        return coreClient.deposit( clientId, accountId, request);
     }
 
-    public AccountDto withdraw(String token, UUID clientId, UUID accountId, MoneyRequest request, AccountType type) {
+    public AccountDto withdraw(String token, UUID clientId, UUID accountId, MoneyRequest request) {
         authService.validateTokenForClient(token, clientId);
-        return coreClient.withdraw(accountId, request, clientId, type);
+        return coreClient.withdraw(clientId, accountId, request);
     }
 
-    public List<AccountDto> getByClient(String token, UUID clientId, AccountType type) {
+    public List<AccountDto> getByClient(String token, UUID clientId) {
         authService.validateTokenForClient(token, clientId);
-        return coreClient.getByClient(clientId, type);
+        return coreClient.getByClient(clientId);
     }
 
     public Page<AccountOperationResponse> operations(String token, UUID clientId, UUID accountId, Pageable pageable, AccountType type) {
         authService.validateTokenForClient(token, clientId);
-        return coreClient.operations(accountId, pageable, clientId, Role.CLIENT, type);
+        return coreClient.operations(clientId, accountId, pageable, Role.CLIENT, type);
     }
 
     public Page<AccountOperationResponse> employeeOperations(String token, UUID accountId, Pageable pageable, AccountType type) {
         authService.validateEmployeeByToken(token);
-        return coreClient.operations(accountId, pageable, UUID.randomUUID(), Role.EMPLOYEE, type);
+        return coreClient.operations(UUID.randomUUID(), accountId, pageable, Role.EMPLOYEE, type);
     }
 
-    public Page<AccountDto> getAll(String token, Pageable pageable){
+    public Page<AccountDto> getAllDebit(String token, Pageable pageable){
         authService.validateEmployeeByToken(token);
-        return coreClient.getAll(pageable);
+        return coreClient.getAllDebit(pageable);
+    }
+
+    public Page<AccountDto> getAllCredit(String token, Pageable pageable){
+        authService.validateEmployeeByToken(token);
+        return coreClient.getAllCredit(pageable);
     }
 }

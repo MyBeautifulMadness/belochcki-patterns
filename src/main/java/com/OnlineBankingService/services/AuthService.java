@@ -135,14 +135,13 @@ public class AuthService {
     }
 
     public boolean validateEmployeeByToken(String token) {
-
         if (jwtService.isTokenExpired(token)) {
-            logout(token);
             throw new RuntimeException("Token expired");
         }
 
-        Employee employee = employeeRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Employee token not found"));
+        UUID employeeId = jwtService.extractUserId(token);
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
 
         if (employee.status == Status.LOCKED) {
             throw new RuntimeException("Employee is locked");

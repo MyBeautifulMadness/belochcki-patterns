@@ -14,27 +14,32 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(url = "http://localhost:8081/api/core")
+@FeignClient(name = "core-service", url = "http://localhost:8081/api/core")
 public interface CoreClient {
 
-    @PostMapping("/debit-accounts")
+    @PostMapping("/clients/{clientId}/debit-accounts")
     AccountDto openAccount(@PathVariable UUID clientId);
 
-    @PostMapping("/debit-accounts/{accountId}/close")
-    AccountDto closeAccount(@PathVariable UUID accountId, @RequestBody UUID clientId);
+    @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/close")
+    AccountDto closeAccount(@PathVariable UUID clientId, @PathVariable UUID accountId);
 
-    @PostMapping("/debit-accounts/{accountId}/deposit")
-    AccountDto deposit(@PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request, @RequestBody UUID clientId);
+    @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/deposit")
+    AccountDto deposit(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request);
 
-    @PostMapping("/accounts/{accountId}/withdraw")
-    AccountDto withdraw(@PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request, @RequestBody UUID clientId, AccountType accountType);
+    @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/withdraw")
+    AccountDto withdraw(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request);
 
-    @GetMapping("/clients/{clientId}/accounts")
-    List<AccountDto> getByClient(@PathVariable UUID clientId, AccountType accountType);
+    @GetMapping("/clients/{clientId}/debit-accounts")
+    List<AccountDto> getByClient(@PathVariable UUID clientId);
 
-    @GetMapping("/accounts/{accountId}/operations")
-    Page<AccountOperationResponse> operations(@PathVariable UUID accountId, Pageable pageable, UUID clientId, Role role, AccountType accountType);
+    @GetMapping("/clients/{clientId}/accounts/{accountId}/operations")
+    Page<AccountOperationResponse> operations(@PathVariable UUID clientId, @PathVariable UUID accountId,
+                                              Pageable pageable,
+                                              @RequestParam Role role, @RequestParam AccountType accountType);
 
-    @GetMapping("/accounts")
-    Page<AccountDto> getAll(Pageable pageable);
+    @GetMapping("/debit-accounts")
+    Page<AccountDto> getAllDebit(Pageable pageable);
+
+    @GetMapping("/credit-accounts")
+    Page<AccountDto> getAllCredit(Pageable pageable);
 }

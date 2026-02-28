@@ -24,7 +24,7 @@ public class CoreGatewayController {
     }
 
 
-    @PostMapping("/debit-accounts/{clientId}")
+    @PostMapping("/clients/{clientId}/debit-accounts")
     public AccountDto openAccount(
             @RequestHeader("Authorization") String token,
             @PathVariable UUID clientId
@@ -32,57 +32,58 @@ public class CoreGatewayController {
         return gatewayService.openAccount(token, clientId);
     }
 
-    @PostMapping("/debit-accounts/{accountId}/close/{clientId}")
+    @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/close")
     public AccountDto closeAccount(
             @RequestHeader("Authorization") String token,
-            @PathVariable UUID clientId,
-            @PathVariable UUID accountId
+            @PathVariable UUID clientId, @PathVariable UUID accountId
     ) {
         return gatewayService.closeAccount(token, clientId, accountId);
     }
 
-    @PostMapping("/debit-accounts/{accountId}/deposit")
+    @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/deposit")
     public AccountDto deposit(@RequestHeader("Authorization") String token,
-                              @PathVariable UUID clientId,
-                              @PathVariable UUID accountId,
+                              @PathVariable UUID clientId, @PathVariable UUID accountId,
                               @Valid @RequestBody MoneyRequest request){
         return gatewayService.deposit(token, clientId, accountId, request);
     }
 
-    @PostMapping("/accounts/{accountId}/withdraw")
+    @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/withdraw")
     public AccountDto withdraw(@RequestHeader("Authorization") String token,
                                @PathVariable UUID clientId,
                                @PathVariable UUID accountId,
-                               @Valid @RequestBody MoneyRequest request,
-                               @RequestBody AccountType type){
-        return gatewayService.withdraw(token, clientId, accountId, request, type);
+                               @Valid @RequestBody MoneyRequest request){
+        return gatewayService.withdraw(token, clientId, accountId, request);
     }
 
-    @GetMapping("/clients/{clientId}/accounts")
-    public List<AccountDto> getByClient(@RequestHeader("Authorization") String token, @PathVariable UUID clientId, @RequestBody AccountType type){
-        return gatewayService.getByClient(token, clientId, type);
+    @GetMapping("/clients/{clientId}/debit-accounts")
+    public List<AccountDto> getByClient(@RequestHeader("Authorization") String token, @PathVariable UUID clientId){
+        return gatewayService.getByClient(token, clientId);
     }
 
-    @GetMapping("/accounts/{accountId}/operations")
+    @GetMapping("/clients/{clientId}/accounts/{accountId}/operations")
     public Page<AccountOperationResponse> operations(@RequestHeader("Authorization") String token,
-                                                     @PathVariable UUID clientId,
-                                                     @PathVariable UUID accountId,
-                                                     @RequestBody Pageable pageable,
-                                                     @RequestBody AccountType type){
-        return gatewayService.operations(token, clientId, accountId, pageable, type);
+                                                     @PathVariable UUID clientId, @PathVariable UUID accountId,
+                                                     Pageable pageable,
+                                                     @RequestParam AccountType accountType){
+        return gatewayService.operations(token, clientId, accountId, pageable, accountType);
     }
 
     @GetMapping("/accounts/{accountId}/operations/employee")
     public Page<AccountOperationResponse> employeeOperations(@RequestHeader("Authorization") String token,
                                                      @PathVariable UUID accountId,
                                                              @RequestBody Pageable pageable,
-                                                             @RequestBody AccountType type){
+                                                             @RequestPart AccountType type){
         return gatewayService.employeeOperations(token, accountId, pageable, type);
     }
 
-    @GetMapping("/accounts")
-    public Page<AccountDto> getAll(@RequestHeader("Authorization") String token, @RequestBody Pageable pageable) {
-        return gatewayService.getAll(token, pageable);
+    @GetMapping("/debit-accounts")
+    public Page<AccountDto> getAllDebit(@RequestHeader("Authorization") String token, @RequestBody Pageable pageable) {
+        return gatewayService.getAllDebit(token, pageable);
+    }
+
+    @GetMapping("/credit-accounts")
+    public Page<AccountDto> getAllCredit(@RequestHeader("Authorization") String token, @RequestBody Pageable pageable) {
+        return gatewayService.getAllCredit(token, pageable);
     }
 
 }
