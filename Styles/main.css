@@ -1,0 +1,64 @@
+.block-row{
+  align-items: center; 
+  display: flex; 
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
+.block-column{
+  display: flex; 
+  align-items: center; 
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+#info_container{
+  margin: 0 auto;
+  width: 70%;
+  height: 80vh;
+  
+}
+
+#info_row_1,
+#info_row_2{
+  max-height: 60vh;
+  margin-bottom: 30px;
+}
+
+#info_row_2{
+  display: none;
+}
+
+#subsidiary,
+#adminka,
+#ivents,
+#about_us{
+  width: 70%;
+  margin: 2%;
+  background-color: black;
+  cursor: pointer;
+  border-radius: 15px;
+  text-decoration: none;
+  padding: 6px;
+  min-width: 190px;
+  height: 150px;
+}
+
+#info_img{
+  max-width: 50px;
+  max-height: 50px;
+}
+
+.info_title{
+  color: white;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.info_description{
+  color: white;
+  font-size: 14px;
+}

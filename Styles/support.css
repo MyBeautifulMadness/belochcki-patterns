@@ -1,0 +1,9 @@
+footer {
+  display: flex; 
+  flex-direction: row; 
+}
+
+
+.supp-text {   
+  margin: 14px 17% 14px auto;
+} 
