@@ -76,6 +76,13 @@ public class ClientCreditServiceImpl implements ClientCreditService {
 
         ClientCredit result = clientCreditRepository.save(credit);
 
+        Map<String, Object> creditIssueBody = Map.of("clientId", request.getClientId(), "amount", result.getCreditAmount(), "comment", "Создание кредитного счета");
+        ResponseEntity<Void> creditIssueResponse = restTemplateConfig.restTemplate().postForEntity("http://localhost:8081/api/core/credit-issued", creditIssueBody, Void.class);
+
+        if (!creditIssueResponse.getStatusCode().is2xxSuccessful()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при создании кредитного счета");
+        }
+
         CreditOperationHistory history = CreditOperationHistory.builder()
                 .clientCreditId(result)
                 .date(result.getIssueData())
