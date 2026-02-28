@@ -1,0 +1,92 @@
+.block-row{
+  align-items: center; 
+  display: flex; 
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  justify-content: space-around;
+  margin-top: 30px;
+}
+
+.block-column{
+  display: flex; 
+  align-items: center; 
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  
+}
+
+
+#ivents-container {
+  margin: 0 auto;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 75%;
+}
+
+
+.ivents-block {
+  padding: 0;
+  color: white;
+  border: 1px solid white;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+}
+
+.ivent-blocks .type,
+.ivent-blocks .description,
+.ivent-blocks .startDate,
+.ivent-blocks .endDate{  
+  margin: 5px 15px;
+}
+
+img.img {
+  margin: 0 auto;
+  max-width: 80%;
+}
+
+.PaginachionContainer{  
+  margin: 0 auto;
+  margin-bottom: 30px;
+  margin-top: auto;
+  border: none;
+  width:75%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;  
+}
+
+#Paginachion{
+  margin-bottom: 0;
+  justify-content: space-between;
+}
+
+.PaginachionContainer button{
+  background-color: #fff;
+  color: #106ef5;
+  border: 1px solid #106ef5;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  cursor: pointer;
+}  
+#button4{
+  background-color: #106ef5;
+  color: #fff;
+  
+}
+#AccountCount{
+  margin-left: auto;
+  margin-right: 10px;
+  width: 50px;
+  border-radius: 5px;
+}

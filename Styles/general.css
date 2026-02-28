@@ -30,7 +30,6 @@ header {
 
 .log { 
     justify-content: start; 
-    margin-left: 1.5%;
     align-items: center;
     display: flex;
     flex-direction: row;
@@ -45,7 +44,7 @@ header {
 
 header a { 
     text-decoration: none; 
-    color: black; 
+    color: red; 
 } 
 
 #userMenu {

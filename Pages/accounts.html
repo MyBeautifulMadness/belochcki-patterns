@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../Styles/accounts.css">
+  <link rel="stylesheet" href="../Styles/general.css">
+  <title>Copy page</title>
+</head>
+<body>
+  <header>
+    <div class="log">
+      <img src="../sorces/logo.png" id="logoimg">
+      <a href="../Pages/main.html" class="return">Главная</a>
+    </div>
+    <span type="submit"  id="in">Вход</span>
+    <div id="userMenu" style="display: none">
+      <button id="profileButton">Личный кабинет</button>
+      <button id="logoutButton">Выход</button>
+  </div>
+  </header>
+  <main>
+    <div class="block-column">
+      <div class="block-row">
+        <div class="block-column">
+          <div class="info-text">Ваши дебетовые счета.</div> 
+          <div id="DebitAccount-container">
+            <template id="DebitAccount-template">
+              <div class="DebitAccount-block">
+                <div class="description"></div>
+                <div class="type"></div>
+                <div class="block-row">
+                  <div class="startDate"></div>
+                  <div class="endDate"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+          <div class="PaginachionContainer" >
+            <div class="block-row" id="Paginachion">
+              <div id="PaginachionContainer"></div>
+              <input type="number" id="AccountCount" value="5">
+            </div>
+          </div>
+        </div> 
+        <div class="block-column">
+          <div class="info-text">Ваши кредитные счета.</div> 
+          <div id="CreditAccount-container">
+            <template id="CreditAccount-template">
+              <div class="CreditAccount-block">
+                <div class="description"></div>
+                <div class="type"></div>
+                <div class="block-row">
+                  <div class="startDate"></div>
+                  <div class="endDate"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div> 
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div class="foot-text">© 2026 - Belochka</div> 
+  </footer>
+  <script src="../Scripts/accounts.js"></script>
+</body>
+</html>

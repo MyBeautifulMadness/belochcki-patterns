@@ -38,7 +38,7 @@
 #about_us{
   width: 70%;
   margin: 2%;
-  background-color: black;
+  background-color: palevioletred;
   cursor: pointer;
   border-radius: 15px;
   text-decoration: none;
@@ -48,17 +48,19 @@
 }
 
 #info_img{
-  max-width: 50px;
-  max-height: 50px;
+  margin-left: 10px;
+  width: 40px;
+  height: 40px;
 }
 
 .info_title{
   color: white;
   font-size: 16px;
-  margin-bottom: 10px;
+  margin: 5px;
 }
 
 .info_description{
   color: white;
   font-size: 14px;
+  margin: 15px;
 }
