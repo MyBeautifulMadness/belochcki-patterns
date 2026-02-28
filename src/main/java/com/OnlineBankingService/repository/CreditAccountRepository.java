@@ -12,28 +12,49 @@ import java.util.UUID;
 
 public interface CreditAccountRepository extends JpaRepository<CreditAccount, UUID> {
 
-    List<CreditAccount> findByClientId(Long clientId);
+    Optional<CreditAccount> findByClientId(UUID clientId);
 
-    Optional<CreditAccount> findByIdAndClientId(UUID id, Long clientId);
+    boolean existsByIdAndClientId(UUID id, UUID clientId);
+    boolean existsByClientId(UUID clientId);
+    boolean existsByName(String name);
 
     @Query(value = """
-      UPDATE credit_account
-      SET balance = balance + :delta
-      WHERE id = :id
-        AND status = 'OPEN'
-        AND (balance + :delta) >= 0
-      RETURNING balance
-      """, nativeQuery = true)
-    BigDecimal applyDeltaReturningBalance(@Param("id") UUID id,
+  UPDATE credit_account
+  SET balance = balance + :delta
+  WHERE client_id = :clientId
+    AND status = 'OPEN'
+  RETURNING balance
+  """, nativeQuery = true)
+    BigDecimal addToBalanceByClientIdOpen(@Param("clientId") UUID clientId,
                                           @Param("delta") BigDecimal delta);
 
     @Query(value = """
-      UPDATE credit_account
-      SET status = 'CLOSED'
-      WHERE id = :id
-        AND status = 'OPEN'
-        AND balance = 0
-      RETURNING id
-      """, nativeQuery = true)
-    Long closeIfZeroBalance(@Param("id") UUID id);
+  UPDATE credit_account
+  SET status = 'OPEN',
+      balance = balance + :delta
+  WHERE client_id = :clientId
+    AND status = 'CLOSED'
+  RETURNING balance
+  """, nativeQuery = true)
+    BigDecimal openAndAddToBalanceByClientId(@Param("clientId") UUID clientId,
+                                             @Param("delta") BigDecimal delta);
+
+    @Query(value = """
+  UPDATE credit_account
+  SET status = 'CLOSED'
+  WHERE client_id = :clientId
+    AND status = 'OPEN'
+  """, nativeQuery = true)
+    int closeByClientId(@Param("clientId") UUID clientId);
+
+    @Query(value = """
+  UPDATE credit_account
+  SET balance = balance + :delta
+  WHERE id = :id
+    AND status = 'OPEN'
+    AND (balance + :delta) >= 0
+  RETURNING balance
+  """, nativeQuery = true)
+    BigDecimal applyDeltaReturningBalance(@Param("id") UUID id,
+                                          @Param("delta") BigDecimal delta);
 }

@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public record CreditAccountResponse(
         UUID id,
-        Long clientId,
+        UUID clientId,
         LocalDate createdDate,
         LocalTime createdTime,
         BigDecimal balance,

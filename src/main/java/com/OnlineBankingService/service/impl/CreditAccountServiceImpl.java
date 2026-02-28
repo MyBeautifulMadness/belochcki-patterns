@@ -6,7 +6,9 @@ import com.OnlineBankingService.dto.*;
 import com.OnlineBankingService.entity.AccountOperation;
 import com.OnlineBankingService.entity.CreditAccount;
 import com.OnlineBankingService.exception.ConflictException;
+import com.OnlineBankingService.exception.ForbiddenException;
 import com.OnlineBankingService.exception.NotFoundException;
+import com.OnlineBankingService.generator.AccountNameGenerator;
 import com.OnlineBankingService.repository.AccountOperationRepository;
 import com.OnlineBankingService.repository.CreditAccountRepository;
 import com.OnlineBankingService.service.CreditAccountService;
@@ -20,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,124 +31,128 @@ public class CreditAccountServiceImpl implements CreditAccountService {
 
     private final CreditAccountRepository accountRepository;
     private final AccountOperationRepository operationRepository;
+    private final AccountNameGenerator nameGenerator;
 
-    @Override
     @Transactional
-    public CreditAccountResponse open(CreditAccountCreateRequest request) {
-        var nowDate = LocalDate.now();
-        var nowTime = LocalTime.now().withNano(0);
+    public CreditAccountResponse withdraw(UUID clientId,
+                                          UUID accountId,
+                                          MoneyRequest request) {
 
-        var account = CreditAccount.builder()
-                .clientId(request.clientId())
-                .createdDate(nowDate)
-                .createdTime(nowTime)
-                .balance(BigDecimal.ZERO.setScale(2))
-                .name(request.name())
-                .status(AccountStatus.OPEN)
-                .build();
+        CreditAccount account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Account not found"));
 
-        account = accountRepository.save(account);
+        if (!account.getClientId().equals(clientId)) {
+            throw new ForbiddenException("Access denied");
+        }
 
-        operationRepository.save(AccountOperation.builder()
-                .accountId(account.getId())
-                .date(nowDate)
-                .time(nowTime)
-                .amount(BigDecimal.ZERO.setScale(2))
-                .comment("Account opened")
-                .operationType(OperationType.OPEN)
-                .build());
-
-        return toResponse(account);
-    }
-
-    @Override
-    @Transactional
-    public CreditAccountResponse deposit(UUID accountId, MoneyRequest request) {
-        BigDecimal delta = normalizeAmount(request.amount());
+        BigDecimal delta = request.amount().setScale(2).negate();
 
         BigDecimal newBalance = accountRepository.applyDeltaReturningBalance(accountId, delta);
+
         if (newBalance == null) {
-            ensureAccountExists(accountId);
-            throw new ConflictException("Account is closed");
+            throw new ConflictException("Insufficient funds or account closed");
         }
 
-        saveOperation(accountId, delta, request.comment(), OperationType.DEPOSIT);
+        saveOperation(accountId, request.amount(),
+                request.comment(), OperationType.WITHDRAW);
 
-        var account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new NotFoundException("Account not found"));
-        return toResponse(account);
-    }
-
-    @Override
-    @Transactional
-    public CreditAccountResponse withdraw(UUID accountId, MoneyRequest request) {
-        BigDecimal delta = normalizeAmount(request.amount()).negate();
-
-        BigDecimal newBalance = accountRepository.applyDeltaReturningBalance(accountId, delta);
-        if (newBalance == null) {
-            ensureAccountExists(accountId);
-            throw new ConflictException("Insufficient funds or account is closed");
-        }
-
-        saveOperation(accountId, delta.abs(), request.comment(), OperationType.WITHDRAW);
-
-        var account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new NotFoundException("Account not found"));
-        return toResponse(account);
-    }
-
-    @Override
-    @Transactional
-    public CreditAccountResponse close(UUID accountId) {
-        Long closedId = accountRepository.closeIfZeroBalance(accountId);
-        if (closedId == null) {
-            ensureAccountExists(accountId);
-            throw new ConflictException("Account must be OPEN and have zero balance to close");
-        }
-
-        saveOperation(accountId, BigDecimal.ZERO.setScale(2), "Account closed", OperationType.CLOSE);
-
-        var account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new NotFoundException("Account not found"));
+        account.setBalance(newBalance);
         return toResponse(account);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CreditAccountResponse> getByClient(Long clientId) {
-        return accountRepository.findByClientId(clientId).stream()
-                .map(this::toResponse)
-                .toList();
+    public CreditAccountResponse getByClient(UUID clientId) {
+        CreditAccount account = accountRepository.findByClientId(clientId)
+                .orElseThrow(() -> new NotFoundException("Credit account not found for client: " + clientId));
+        return toResponse(account);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AccountOperationResponse> getOperations(UUID accountId, Pageable pageable) {
-        ensureAccountExists(accountId);
-        return operationRepository.findByAccountId(accountId, pageable)
+    public Page<AccountOperationResponse> getOperations(UUID clientId, UUID creditAccountId, Pageable pageable) {
+        CreditAccount account = accountRepository.findById(creditAccountId)
+                .orElseThrow(() -> new NotFoundException("Credit account not found: " + creditAccountId));
+
+        if (!account.getClientId().equals(clientId)) {
+            throw new ForbiddenException("You cannot access this credit account");
+        }
+
+        return operationRepository.findByAccountId(creditAccountId, pageable)
                 .map(this::toResponse);
     }
 
     @Override
     @Transactional
-    public CreditAccountResponse withdrawByCreditService(UUID creditAccountId, CreditServiceWithdrawRequest request) {
-        BigDecimal delta = normalizeAmount(request.amount()).negate();
+    public CreditAccountResponse onCreditIssued(CreditIssuedRequest request) {
+        UUID clientId = request.clientId();
+        BigDecimal amount = normalizeAmount(request.amount());
 
-        BigDecimal newBalance = accountRepository.applyDeltaReturningBalance(creditAccountId, delta);
-        if (newBalance == null) {
-            ensureAccountExists(creditAccountId);
-            throw new ConflictException("Insufficient funds or account is closed");
+        BigDecimal newBalance = accountRepository.addToBalanceByClientIdOpen(clientId, amount);
+
+        if (newBalance != null) {
+            CreditAccount acc = accountRepository.findByClientId(clientId)
+                    .orElseThrow(() -> new NotFoundException("Credit account not found after top-up for client: " + clientId));
+
+            saveOperation(acc.getId(), amount, request.commentOrDefault("Credit issued"), OperationType.DEPOSIT);
+            acc.setBalance(newBalance);
+            return toResponse(acc);
         }
 
-        saveOperation(
-                creditAccountId,
-                delta.abs(),
-                request.comment() != null ? request.comment() : "Withdrawal requested by Credit Service",
-                OperationType.CREDIT_SERVICE_WITHDRAW
-        );
+        newBalance = accountRepository.openAndAddToBalanceByClientId(clientId, amount);
+        if (newBalance != null) {
+            CreditAccount acc = accountRepository.findByClientId(clientId)
+                    .orElseThrow(() -> new NotFoundException("Credit account not found after reopen for client: " + clientId));
 
-        var account = accountRepository.findById(creditAccountId)
-                .orElseThrow(() -> new NotFoundException("Account not found"));
+            saveOperation(acc.getId(), amount, request.commentOrDefault("Credit issued (reopen)"), OperationType.DEPOSIT);
+            acc.setBalance(newBalance);
+            return toResponse(acc);
+        }
+
+        var nowDate = LocalDate.now();
+        var nowTime = LocalTime.now().withNano(0);
+
+        CreditAccount created = CreditAccount.builder()
+                .clientId(clientId)
+                .createdDate(nowDate)
+                .createdTime(nowTime)
+                .balance(amount)
+                .name(generateUniqueNameForCredit())
+                .status(AccountStatus.OPEN)
+                .build();
+
+        created = accountRepository.save(created);
+
+        saveOperation(created.getId(), amount, request.commentOrDefault("Credit issued (create)"), OperationType.DEPOSIT);
+
+        return toResponse(created);
+    }
+
+    private String generateUniqueNameForCredit() {
+        for (int i = 0; i < 10; i++) {
+            String candidate = nameGenerator.generate16Digits();
+            if (!accountRepository.existsByName(candidate)) {
+                return candidate;
+            }
+        }
+        throw new IllegalStateException("Failed to generate unique account name");
+    }
+
+    @Override
+    @Transactional
+    public CreditAccountResponse closeByCreditService(UUID clientId) {
+
+        CreditAccount account = accountRepository.findByClientId(clientId)
+                .orElseThrow(() -> new NotFoundException("Credit account not found for client: " + clientId));
+
+        int updated = accountRepository.closeByClientId(clientId);
+        if (updated == 0) {
+            return toResponse(account);
+        }
+
+        saveOperation(account.getId(), BigDecimal.ZERO.setScale(2), "Credit account closed by Credit Service", OperationType.CLOSE);
+
+        account.setStatus(AccountStatus.CLOSED);
         return toResponse(account);
     }
 
@@ -161,12 +168,6 @@ public class CreditAccountServiceImpl implements CreditAccountService {
                 .comment(comment)
                 .operationType(type)
                 .build());
-    }
-
-    private void ensureAccountExists(UUID accountId) {
-        if (!accountRepository.existsById(accountId)) {
-            throw new NotFoundException("Account not found: " + accountId);
-        }
     }
 
     private BigDecimal normalizeAmount(BigDecimal amount) {

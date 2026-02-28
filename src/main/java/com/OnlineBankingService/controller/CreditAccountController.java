@@ -1,9 +1,6 @@
 package com.OnlineBankingService.controller;
 
-import com.OnlineBankingService.dto.AccountOperationResponse;
-import com.OnlineBankingService.dto.CreditAccountCreateRequest;
-import com.OnlineBankingService.dto.CreditAccountResponse;
-import com.OnlineBankingService.dto.MoneyRequest;
+import com.OnlineBankingService.dto.*;
 import com.OnlineBankingService.service.CreditAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,33 +18,28 @@ public class CreditAccountController {
 
     private final CreditAccountService service;
 
-    @PostMapping("/credit-accounts")
-    public CreditAccountResponse open(@Valid @RequestBody CreditAccountCreateRequest request) {
-        return service.open(request);
-    }
-
-    @PostMapping("/credit-accounts/{accountId}/deposit")
-    public CreditAccountResponse deposit(@PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request) {
-        return service.deposit(accountId, request);
-    }
-
-    @PostMapping("/credit-accounts/{accountId}/withdraw")
-    public CreditAccountResponse withdraw(@PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request) {
-        return service.withdraw(accountId, request);
-    }
-
-    @PostMapping("/credit-accounts/{accountId}/close")
-    public CreditAccountResponse close(@PathVariable UUID accountId) {
-        return service.close(accountId);
-    }
-
-    @GetMapping("/clients/{clientId}/credit-accounts")
-    public List<CreditAccountResponse> getByClient(@PathVariable Long clientId) {
+    @GetMapping("/clients/{clientId}/credit-account")
+    public CreditAccountResponse getMyCreditAccount(@PathVariable UUID clientId) {
         return service.getByClient(clientId);
     }
 
+    @PostMapping("/credit-accounts/{accountId}/withdraw")
+    public CreditAccountResponse withdraw(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request) {
+        return service.withdraw(clientId, accountId, request);
+    }
+
     @GetMapping("/credit-accounts/{accountId}/operations")
-    public Page<AccountOperationResponse> operations(@PathVariable UUID accountId, Pageable pageable) {
-        return service.getOperations(accountId, pageable);
+    public Page<AccountOperationResponse> operations(@PathVariable UUID clientId, @PathVariable UUID accountId, Pageable pageable) {
+        return service.getOperations(clientId, accountId, pageable);
+    }
+
+    @PostMapping("/credit-issued")
+    public CreditAccountResponse onCreditIssued(@Valid @RequestBody CreditIssuedRequest request) {
+        return service.onCreditIssued(request);
+    }
+
+    @PostMapping("/{clientId}/close")
+    public CreditAccountResponse close(@PathVariable UUID clientId) {
+        return service.closeByCreditService(clientId);
     }
 }

@@ -26,7 +26,7 @@ public class CreditAccount {
     private UUID id;
 
     @Column(name = "client_id", nullable = false)
-    private Long clientId;
+    private UUID clientId;
 
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
@@ -37,7 +37,7 @@ public class CreditAccount {
     @Column(name = "balance", nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
 
-    @Column(name = "name", nullable = false, length = 120)
+    @Column(name = "name", nullable = false, length = 16)
     private String name;
 
     @Enumerated(EnumType.STRING)

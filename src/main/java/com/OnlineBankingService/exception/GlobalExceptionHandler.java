@@ -36,6 +36,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error", req);
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiError> forbidden(ForbiddenException ex, HttpServletRequest req) {
+        return build(HttpStatus.FORBIDDEN, ex.getMessage(), req);
+    }
+
     private ResponseEntity<ApiError> build(HttpStatus status, String message, HttpServletRequest req) {
         return ResponseEntity.status(status).body(new ApiError(
                 Instant.now(),

@@ -10,17 +10,13 @@ import java.util.UUID;
 
 public interface CreditAccountService {
 
-    CreditAccountResponse open(CreditAccountCreateRequest request);
+    CreditAccountResponse withdraw(UUID clientId, UUID creditAccountId, MoneyRequest request);
 
-    CreditAccountResponse deposit(UUID accountId, MoneyRequest request);
+    CreditAccountResponse getByClient(UUID clientId);
 
-    CreditAccountResponse withdraw(UUID accountId, MoneyRequest request);
+    Page<AccountOperationResponse> getOperations(UUID clientId, UUID creditAccountId, Pageable pageable);
 
-    CreditAccountResponse close(UUID accountId);
+    CreditAccountResponse onCreditIssued(CreditIssuedRequest request);
 
-    List<CreditAccountResponse> getByClient(Long clientId);
-
-    Page<AccountOperationResponse> getOperations(UUID accountId, Pageable pageable);
-
-    CreditAccountResponse withdrawByCreditService(UUID creditAccountId, CreditServiceWithdrawRequest request);
+    CreditAccountResponse closeByCreditService(UUID clientId);
 }

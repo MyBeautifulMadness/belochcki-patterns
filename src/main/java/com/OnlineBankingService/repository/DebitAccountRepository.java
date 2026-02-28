@@ -12,9 +12,12 @@ import java.util.UUID;
 
 public interface DebitAccountRepository extends JpaRepository<DebitAccount, UUID> {
 
-    List<DebitAccount> findByClientId(Long clientId);
+    List<DebitAccount> findByClientId(UUID clientId);
 
-    Optional<DebitAccount> findByIdAndClientId(UUID id, Long clientId);
+    boolean existsByIdAndClientId(UUID id, UUID clientId);
+    boolean existsByName(String name);
+
+    Optional<DebitAccount> findByIdAndClientId(UUID id, UUID clientId);
 
     @Query(value = """
       UPDATE debit_account
@@ -25,6 +28,7 @@ public interface DebitAccountRepository extends JpaRepository<DebitAccount, UUID
       RETURNING balance
       """, nativeQuery = true)
     BigDecimal applyDeltaReturningBalance(@Param("id") UUID id,
+                                          @Param("clientId") UUID clientId,
                                           @Param("delta") BigDecimal delta);
 
     @Query(value = """
@@ -35,5 +39,6 @@ public interface DebitAccountRepository extends JpaRepository<DebitAccount, UUID
         AND balance = 0
       RETURNING id
       """, nativeQuery = true)
-    Long closeIfZeroBalance(@Param("id") UUID id);
+    Long closeIfZeroBalance(@Param("id") UUID id,
+                            @Param("clientId") UUID clientId);
 }

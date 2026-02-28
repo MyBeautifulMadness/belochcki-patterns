@@ -1,5 +1,7 @@
 package com.OnlineBankingService.controller;
 
+import com.OnlineBankingService.domain.AccountType;
+import com.OnlineBankingService.domain.Role;
 import com.OnlineBankingService.dto.AccountOperationResponse;
 import com.OnlineBankingService.dto.DebitAccountCreateRequest;
 import com.OnlineBankingService.dto.DebitAccountResponse;
@@ -21,32 +23,34 @@ public class DebitAccountController {
     private final DebitAccountService service;
 
     @PostMapping("/debit-accounts")
-    public DebitAccountResponse open(@Valid @RequestBody DebitAccountCreateRequest request) {
-        return service.open(request);
+    public DebitAccountResponse open(@PathVariable UUID clientId, @Valid @RequestBody DebitAccountCreateRequest request) {
+        return service.open(clientId, request);
     }
 
     @PostMapping("/debit-accounts/{accountId}/deposit")
-    public DebitAccountResponse deposit(@PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request) {
-        return service.deposit(accountId, request);
+    public DebitAccountResponse deposit(@PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request, @RequestBody UUID clientId) {
+        return service.deposit(accountId, request, clientId);
     }
 
     @PostMapping("/debit-accounts/{accountId}/withdraw")
-    public DebitAccountResponse withdraw(@PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request) {
-        return service.withdraw(accountId, request);
+    public DebitAccountResponse withdraw(@PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request, @RequestBody UUID clientId) {
+        return service.withdraw(accountId, request, clientId);
     }
 
     @PostMapping("/debit-accounts/{accountId}/close")
-    public DebitAccountResponse close(@PathVariable UUID accountId) {
-        return service.close(accountId);
+    public DebitAccountResponse close(@PathVariable UUID accountId, @RequestBody UUID clientId) {
+        return service.close(accountId, clientId);
     }
 
     @GetMapping("/clients/{clientId}/debit-accounts")
-    public List<DebitAccountResponse> getByClient(@PathVariable Long clientId) {
+    public List<DebitAccountResponse> getByClient(@PathVariable UUID clientId) {
         return service.getByClient(clientId);
     }
 
     @GetMapping("/debit-accounts/{accountId}/operations")
-    public Page<AccountOperationResponse> operations(@PathVariable UUID accountId, Pageable pageable) {
-        return service.getOperations(accountId, pageable);
+    public Page<AccountOperationResponse> operations(@PathVariable UUID accountId, Pageable pageable,
+                                                     @PathVariable UUID clientId, Role role, AccountType accountType) {
+        return service.getOperations(accountId, pageable, clientId, role, accountType);
     }
+
 }

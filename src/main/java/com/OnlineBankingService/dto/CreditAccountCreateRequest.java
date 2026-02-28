@@ -3,8 +3,12 @@ package com.OnlineBankingService.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
 public record CreditAccountCreateRequest(
-        @NotNull Long clientId,
-        @NotBlank String name
-) {
+        @NotNull UUID clientId,
+        @NotBlank String name,
+        @NotBlank BigDecimal amount
+        ) {
 }
