@@ -13,7 +13,7 @@ import java.util.UUID;
 @Component
 public class JwtService {
 
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private static final Key key = Keys.hmacShaKeyFor("MySuperSecretKeyThatIsLongEnough123456".getBytes());
     private final long EXPIRATION = 1000 * 60 * 60;
 
     public String generateToken(UUID userId, String login, String role) {

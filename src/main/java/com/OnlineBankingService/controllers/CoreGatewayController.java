@@ -26,7 +26,7 @@ public class CoreGatewayController {
 
     @PostMapping("/clients/{clientId}/debit-accounts")
     public AccountDto openAccount(
-            @RequestHeader("Authorization") String token,
+            @RequestBody String token,
             @PathVariable UUID clientId
     ) {
         return gatewayService.openAccount(token, clientId);
@@ -34,21 +34,21 @@ public class CoreGatewayController {
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/close")
     public AccountDto closeAccount(
-            @RequestHeader("Authorization") String token,
+            @RequestBody String token,
             @PathVariable UUID clientId, @PathVariable UUID accountId
     ) {
         return gatewayService.closeAccount(token, clientId, accountId);
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/deposit")
-    public AccountDto deposit(@RequestHeader("Authorization") String token,
+    public AccountDto deposit(@RequestBody String token,
                               @PathVariable UUID clientId, @PathVariable UUID accountId,
                               @Valid @RequestBody MoneyRequest request){
         return gatewayService.deposit(token, clientId, accountId, request);
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/withdraw")
-    public AccountDto withdraw(@RequestHeader("Authorization") String token,
+    public AccountDto withdraw(@RequestBody String token,
                                @PathVariable UUID clientId,
                                @PathVariable UUID accountId,
                                @Valid @RequestBody MoneyRequest request){
@@ -56,12 +56,12 @@ public class CoreGatewayController {
     }
 
     @GetMapping("/clients/{clientId}/debit-accounts")
-    public List<AccountDto> getByClient(@RequestHeader("Authorization") String token, @PathVariable UUID clientId){
+    public List<AccountDto> getByClient(@RequestBody String token, @PathVariable UUID clientId){
         return gatewayService.getByClient(token, clientId);
     }
 
     @GetMapping("/clients/{clientId}/accounts/{accountId}/operations")
-    public Page<AccountOperationResponse> operations(@RequestHeader("Authorization") String token,
+    public Page<AccountOperationResponse> operations(@RequestBody String token,
                                                      @PathVariable UUID clientId, @PathVariable UUID accountId,
                                                      Pageable pageable,
                                                      @RequestParam AccountType accountType){
@@ -69,7 +69,7 @@ public class CoreGatewayController {
     }
 
     @GetMapping("/accounts/{accountId}/operations/employee")
-    public Page<AccountOperationResponse> employeeOperations(@RequestHeader("Authorization") String token,
+    public Page<AccountOperationResponse> employeeOperations(@RequestBody String token,
                                                      @PathVariable UUID accountId,
                                                              @RequestBody Pageable pageable,
                                                              @RequestPart AccountType type){
@@ -77,12 +77,12 @@ public class CoreGatewayController {
     }
 
     @GetMapping("/debit-accounts")
-    public Page<AccountDto> getAllDebit(@RequestHeader("Authorization") String token, @RequestBody Pageable pageable) {
+    public Page<AccountDto> getAllDebit(@RequestBody String token, @RequestBody Pageable pageable) {
         return gatewayService.getAllDebit(token, pageable);
     }
 
     @GetMapping("/credit-accounts")
-    public Page<AccountDto> getAllCredit(@RequestHeader("Authorization") String token, @RequestBody Pageable pageable) {
+    public Page<AccountDto> getAllCredit(@RequestBody String token, @RequestBody Pageable pageable) {
         return gatewayService.getAllCredit(token, pageable);
     }
 
