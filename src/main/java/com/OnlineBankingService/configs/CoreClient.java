@@ -3,12 +3,16 @@ package com.OnlineBankingService.configs;
 import com.OnlineBankingService.dtos.AccountOperationResponse;
 import com.OnlineBankingService.dtos.AccountDto;
 import com.OnlineBankingService.dtos.MoneyRequest;
+import com.OnlineBankingService.dtos.PagedResponse;
 import com.OnlineBankingService.entities.AccountType;
 import com.OnlineBankingService.entities.Role;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,9 +41,9 @@ public interface CoreClient {
                                               Pageable pageable,
                                               @RequestParam Role role, @RequestParam AccountType accountType);
 
-    @GetMapping("/debit-accounts")
-    Page<AccountDto> getAllDebit(Pageable pageable);
+    @GetMapping("/admin/debit-accounts")
+    PagedResponse<AccountDto> getAllDebit(Pageable pageable);
 
-    @GetMapping("/credit-accounts")
-    Page<AccountDto> getAllCredit(Pageable pageable);
+    @GetMapping("/admin/credit-accounts")
+    PagedResponse<AccountDto> getAllCredit(Pageable pageable);
 }

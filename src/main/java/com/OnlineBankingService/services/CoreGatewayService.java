@@ -4,12 +4,12 @@ import com.OnlineBankingService.configs.CoreClient;
 import com.OnlineBankingService.dtos.AccountOperationResponse;
 import com.OnlineBankingService.dtos.AccountDto;
 import com.OnlineBankingService.dtos.MoneyRequest;
+import com.OnlineBankingService.dtos.PagedResponse;
 import com.OnlineBankingService.entities.AccountType;
 import com.OnlineBankingService.entities.Role;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,11 +61,21 @@ public class CoreGatewayService {
 
     public Page<AccountDto> getAllDebit(String token, Pageable pageable){
         authService.validateEmployeeByToken(token);
-        return coreClient.getAllDebit(pageable);
+        PagedResponse<AccountDto> response = coreClient.getAllDebit(pageable);
+        return new PageImpl<>(
+                response.getContent(),
+                PageRequest.of(response.getPage(), response.getSize()),
+                response.getTotalElements()
+        );
     }
 
     public Page<AccountDto> getAllCredit(String token, Pageable pageable){
         authService.validateEmployeeByToken(token);
-        return coreClient.getAllCredit(pageable);
+        PagedResponse<AccountDto> response = coreClient.getAllDebit(pageable);
+        return new PageImpl<>(
+                response.getContent(),
+                PageRequest.of(response.getPage(), response.getSize()),
+                response.getTotalElements()
+        );
     }
 }
