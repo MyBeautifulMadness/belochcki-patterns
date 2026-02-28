@@ -12,6 +12,7 @@ public class CreditTariffRequest {
     @NotNull
     private String name;
     private String description;
+    private String token;
 
     @NotNull
     @Positive

@@ -2,6 +2,7 @@ package com.OnlineBankingService.controller;
 
 import com.OnlineBankingService.entity.dto.CreditTariffRequest;
 import com.OnlineBankingService.entity.dto.CreditTariffResponse;
+import com.OnlineBankingService.entity.dto.DeleteCreditTariffRequest;
 import com.OnlineBankingService.repository.CreditTariffRepository;
 import com.OnlineBankingService.service.CreditTariffService;
 import jakarta.validation.Valid;
@@ -26,8 +27,8 @@ public class CreditTariffController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public void delete(@PathVariable UUID id){
-        service.deleteCreditTariff(id);
+    public void delete(@PathVariable UUID id, @RequestBody DeleteCreditTariffRequest request){
+        service.deleteCreditTariff(id, request);
     }
 
     @GetMapping("/getAll")

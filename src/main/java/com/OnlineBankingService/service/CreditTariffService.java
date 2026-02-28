@@ -2,6 +2,7 @@ package com.OnlineBankingService.service;
 
 import com.OnlineBankingService.entity.dto.CreditTariffRequest;
 import com.OnlineBankingService.entity.dto.CreditTariffResponse;
+import com.OnlineBankingService.entity.dto.DeleteCreditTariffRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -12,7 +13,7 @@ public interface CreditTariffService {
 
     CreditTariffResponse createCreditTariff(CreditTariffRequest request);
 
-    void deleteCreditTariff(UUID id);
+    void deleteCreditTariff(UUID id, DeleteCreditTariffRequest request);
 
     Map<String, Object> getAllCreditTariff(String name, String description, BigDecimal amountFrom, BigDecimal amountTo, BigDecimal interestRate, String sortBy, String direction, int page, int size);
 
