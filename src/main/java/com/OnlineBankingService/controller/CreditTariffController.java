@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -30,11 +31,11 @@ public class CreditTariffController {
     }
 
     @GetMapping("/getAll")
-    public List<CreditTariffResponse> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) String description,
-                                             @RequestParam(required = false) BigDecimal amountFrom, @RequestParam(required = false) BigDecimal amountTo,
-                                             @RequestParam(required = false) BigDecimal interestRate, @RequestParam(required = false) String sortBy,
-                                             @RequestParam(defaultValue = "asc") String direction){
-        return service.getAllCreditTariff(name, description, amountFrom, amountTo, interestRate, sortBy, direction);
+    public Map<String, Object> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) String description,
+                                            @RequestParam(required = false) BigDecimal amountFrom, @RequestParam(required = false) BigDecimal amountTo,
+                                            @RequestParam(required = false) BigDecimal interestRate, @RequestParam(required = false) String sortBy,
+                                            @RequestParam(defaultValue = "asc") String direction, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return service.getAllCreditTariff(name, description, amountFrom, amountTo, interestRate, sortBy, direction, page, size);
     }
 
     @GetMapping("/getById/{id}")

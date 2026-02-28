@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -27,12 +28,13 @@ public class ClientCreditController {
     }
 
     @GetMapping("/getAll")
-    public List<ClientCreditResponse> getAll(@RequestParam(required = false) UUID clientId, @RequestParam(required = false) UUID creditTariffId,
-                                             @RequestParam(required = false) BigDecimal creditAmountFrom, @RequestParam(required = false) BigDecimal creditAmountTo,
-                                             @RequestParam(required = false) BigDecimal debtAmountFrom, @RequestParam(required = false) BigDecimal debtAmountTo,
-                                             @RequestParam(required = false) String creditStatus, @RequestParam(required = false) String sortBy,
-                                             @RequestParam(defaultValue = "asc") String direction){
-        return service.getAllClientCredit(clientId, creditTariffId, creditAmountFrom, creditAmountTo, debtAmountFrom, debtAmountTo, creditStatus, sortBy, direction);
+    public Map<String, Object> getAll(@RequestParam(required = false) UUID clientId, @RequestParam(required = false) UUID creditTariffId,
+                                            @RequestParam(required = false) BigDecimal creditAmountFrom, @RequestParam(required = false) BigDecimal creditAmountTo,
+                                            @RequestParam(required = false) BigDecimal debtAmountFrom, @RequestParam(required = false) BigDecimal debtAmountTo,
+                                            @RequestParam(required = false) String creditStatus, @RequestParam(required = false) String sortBy,
+                                            @RequestParam(defaultValue = "asc") String direction, @RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "10") int size){
+        return service.getAllClientCredit(clientId, creditTariffId, creditAmountFrom, creditAmountTo, debtAmountFrom, debtAmountTo, creditStatus, sortBy, direction, page, size);
     }
 
     @GetMapping("/getById/{id}")

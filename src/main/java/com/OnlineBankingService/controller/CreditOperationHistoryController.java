@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -22,11 +23,11 @@ public class CreditOperationHistoryController {
     private final CreditOperationHistoryService creditOperationHistoryService;
 
     @GetMapping("/getAll")
-    public List<CreditOperationHistoryResponse> getAll(@RequestParam(required = false) UUID clientCreditId, @RequestParam(required = false) OperationType operationType,
-            @RequestParam(required = false) LocalDate dateFrom, @RequestParam(required = false) LocalDate dateTo,
-            @RequestParam(required = false) BigDecimal amountFrom, @RequestParam(required = false) BigDecimal amountTo,
-            @RequestParam(required = false) String sortBy, @RequestParam(defaultValue = "asc") String direction) {
+    public Map<String, Object> getAll(@RequestParam(required = false) UUID clientCreditId, @RequestParam(required = false) OperationType operationType,
+                                                      @RequestParam(required = false) LocalDate dateFrom, @RequestParam(required = false) LocalDate dateTo,
+                                                      @RequestParam(required = false) BigDecimal amountFrom, @RequestParam(required = false) BigDecimal amountTo,
+                                                      @RequestParam(required = false) String sortBy, @RequestParam(defaultValue = "asc") String direction, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 
-        return creditOperationHistoryService.getAllOperations(clientCreditId, operationType, dateFrom, dateTo, amountFrom, amountTo, sortBy, direction);
+        return creditOperationHistoryService.getAllOperations(clientCreditId, operationType, dateFrom, dateTo, amountFrom, amountTo, sortBy, direction, page, size);
     }
 }

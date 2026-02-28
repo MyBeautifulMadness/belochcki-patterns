@@ -6,6 +6,9 @@ import com.OnlineBankingService.entity.dto.CreditTariffResponse;
 import com.OnlineBankingService.repository.CreditTariffRepository;
 import com.OnlineBankingService.service.CreditTariffService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -13,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -50,7 +55,7 @@ public class CreditTariffServiceImpl implements CreditTariffService {
     }
 
     @Override
-    public List<CreditTariffResponse> getAllCreditTariff(String name, String description, BigDecimal amountFrom, BigDecimal amountTo, BigDecimal interestRate, String sortBy, String direction){
+    public Map<String, Object> getAllCreditTariff(String name, String description, BigDecimal amountFrom, BigDecimal amountTo, BigDecimal interestRate, String sortBy, String direction, int page, int size){
 
         Specification<CreditTariff> spec = (root, query, cb) -> {
 
@@ -86,8 +91,10 @@ public class CreditTariffServiceImpl implements CreditTariffService {
             sort = Sort.by(sortDirection, sortBy);
         }
 
-        return creditTariffRepository
-                .findAll(spec, sort)
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<CreditTariff> tariffPage = creditTariffRepository.findAll(spec, pageable);
+
+        List<CreditTariffResponse> data = tariffPage.getContent()
                 .stream()
                 .map(creditTariff -> CreditTariffResponse.builder()
                         .id(creditTariff.getId())
@@ -98,6 +105,15 @@ public class CreditTariffServiceImpl implements CreditTariffService {
                         .interestRate(creditTariff.getInterestRate())
                         .build())
                 .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", data);
+        response.put("page", tariffPage.getNumber());
+        response.put("size", tariffPage.getSize());
+        response.put("count", tariffPage.getTotalPages());
+        response.put("totalElements", tariffPage.getTotalElements());
+
+        return response;
     }
 
     @Override

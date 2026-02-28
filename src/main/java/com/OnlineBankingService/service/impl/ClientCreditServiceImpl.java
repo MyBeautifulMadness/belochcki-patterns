@@ -15,6 +15,9 @@ import com.OnlineBankingService.repository.CreditOperationHistoryRepository;
 import com.OnlineBankingService.repository.CreditTariffRepository;
 import com.OnlineBankingService.service.ClientCreditService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.*;
@@ -24,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -109,7 +113,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
 
 
     @Override
-    public List<ClientCreditResponse> getAllClientCredit(UUID clientId, UUID creditTariffId, BigDecimal creditAmountFrom, BigDecimal creditAmountTo, BigDecimal debtAmountFrom, BigDecimal debtAmountTo, String creditStatus, String sortBy, String direction){
+    public Map<String, Object> getAllClientCredit(UUID clientId, UUID creditTariffId, BigDecimal creditAmountFrom, BigDecimal creditAmountTo, BigDecimal debtAmountFrom, BigDecimal debtAmountTo, String creditStatus, String sortBy, String direction, int page, int size){
         Specification<ClientCredit> spec = (root, query, cb) -> {
 
             var predicate = cb.conjunction();
@@ -152,8 +156,10 @@ public class ClientCreditServiceImpl implements ClientCreditService {
             sort = Sort.by(sortDirection, sortBy);
         }
 
-        return clientCreditRepository
-                .findAll(spec, sort)
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<ClientCredit> creditPage = clientCreditRepository.findAll(spec, pageable);
+
+        List<ClientCreditResponse> data = creditPage.getContent()
                 .stream()
                 .map(credit -> ClientCreditResponse.builder()
                         .id(credit.getId())
@@ -167,6 +173,15 @@ public class ClientCreditServiceImpl implements ClientCreditService {
                         .lastPaymentDate(credit.getLastPaymentDate())
                         .build())
                 .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", data);
+        response.put("page", creditPage.getNumber());
+        response.put("size", creditPage.getSize());
+        response.put("count", creditPage.getTotalPages());
+        response.put("totalElements", creditPage.getTotalElements());
+
+        return response;
     }
 
 

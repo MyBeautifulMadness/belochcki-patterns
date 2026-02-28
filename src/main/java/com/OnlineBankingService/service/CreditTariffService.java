@@ -5,6 +5,7 @@ import com.OnlineBankingService.entity.dto.CreditTariffResponse;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface CreditTariffService {
@@ -13,7 +14,7 @@ public interface CreditTariffService {
 
     void deleteCreditTariff(UUID id);
 
-    List<CreditTariffResponse> getAllCreditTariff(String name, String description, BigDecimal amountFrom, BigDecimal amountTo, BigDecimal interestRate, String sortBy, String direction);
+    Map<String, Object> getAllCreditTariff(String name, String description, BigDecimal amountFrom, BigDecimal amountTo, BigDecimal interestRate, String sortBy, String direction, int page, int size);
 
     CreditTariffResponse getByIdCreditTariff(UUID id);
 

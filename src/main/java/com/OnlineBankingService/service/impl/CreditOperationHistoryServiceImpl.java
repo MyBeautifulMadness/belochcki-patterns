@@ -7,13 +7,18 @@ import com.OnlineBankingService.repository.CreditOperationHistoryRepository;
 import com.OnlineBankingService.service.CreditOperationHistoryService;
 import com.OnlineBankingService.service.CreditTariffService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -23,8 +28,8 @@ public class CreditOperationHistoryServiceImpl implements CreditOperationHistory
     private final CreditOperationHistoryRepository creditOperationHistoryRepository;
 
     @Override
-    public List<CreditOperationHistoryResponse> getAllOperations(UUID clientCreditId, OperationType operationType, LocalDate dateFrom, LocalDate dateTo,
-                                                                 BigDecimal amountFrom, BigDecimal amountTo, String sortBy, String direction){
+    public Map<String, Object> getAllOperations(UUID clientCreditId, OperationType operationType, LocalDate dateFrom, LocalDate dateTo,
+                                                                BigDecimal amountFrom, BigDecimal amountTo, String sortBy, String direction, int page, int size){
 
         Specification<CreditOperationHistory> spec = (root, query, cb) -> {
 
@@ -65,7 +70,10 @@ public class CreditOperationHistoryServiceImpl implements CreditOperationHistory
             sort = Sort.by(sortDirection, sortBy);
         }
 
-        return creditOperationHistoryRepository.findAll(spec, sort)
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<CreditOperationHistory> operationPage = creditOperationHistoryRepository.findAll(spec, pageable);
+
+        List<CreditOperationHistoryResponse> data = operationPage.getContent()
                 .stream()
                 .map(operation -> CreditOperationHistoryResponse.builder()
                         .id(operation.getId())
@@ -77,5 +85,14 @@ public class CreditOperationHistoryServiceImpl implements CreditOperationHistory
                         .clientCreditId(operation.getClientCreditId().getId())
                         .build())
                 .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", data);
+        response.put("page", operationPage.getNumber());
+        response.put("size", operationPage.getSize());
+        response.put("count", operationPage.getTotalPages());
+        response.put("totalElements", operationPage.getTotalElements());
+
+        return response;
     }
 }
