@@ -38,7 +38,7 @@ public class AuthController {
     }
 
     @PostMapping("/validate-employee")
-    public boolean validateEmployeeToken(@RequestBody String token) {
+    public boolean validateEmployeeToken(@RequestHeader("Authorization") String token) {
         return authService.validateEmployeeByToken(token);
     }
 }

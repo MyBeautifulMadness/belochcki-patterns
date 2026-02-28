@@ -44,12 +44,12 @@ public class ClientController {
     }
 
     @PatchMapping("/{id}/lock")
-    public Client lock(@PathVariable UUID id, @RequestBody String token) {
+    public Client lock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
         return clientService.lock(id, token);
     }
 
     @PatchMapping("/{id}/unlock")
-    public Client unlock(@PathVariable UUID id, @RequestBody String token) {
+    public Client unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
         return clientService.unlock(id,token);
     }
 }

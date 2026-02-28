@@ -86,18 +86,19 @@ public class AuthService {
 
     public Object validateToken(String token) {
 
-        if (jwtService.isTokenExpired(token)) {
-            logout(token);
+        final String vtoken = token.replace("Bearer ", "");
+        if (jwtService.isTokenExpired(vtoken)) {
+            logout(vtoken);
             throw new RuntimeException("Token expired");
         }
 
-        return employeeRepository.findByToken(token)
+        return employeeRepository.findByToken(vtoken)
                 .<Object>map(e -> {
                     if (e.status == Status.LOCKED) throw new RuntimeException("Employee locked");
                     return e;
                 })
                 .orElseGet(() ->
-                        clientRepository.findByToken(token)
+                        clientRepository.findByToken(vtoken)
                                 .map(c -> {
                                     if (c.status == Status.LOCKED) throw new RuntimeException("Client locked");
                                     return c;
@@ -111,6 +112,7 @@ public class AuthService {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new RuntimeException("Client not found"));
 
+        token = token.replace("Bearer ", "");
         if (jwtService.isTokenExpired(token)) {
             client.token = null;
             clientRepository.save(client);
@@ -135,6 +137,7 @@ public class AuthService {
     }
 
     public boolean validateEmployeeByToken(String token) {
+        token = token.replace("Bearer ", "");
         if (jwtService.isTokenExpired(token)) {
             throw new RuntimeException("Token expired");
         }

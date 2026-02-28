@@ -44,12 +44,12 @@ public class EmployeeController {
     }
 
     @PatchMapping("/{id}/lock")
-    public Employee lock(@PathVariable UUID id, @RequestBody String token) {
+    public Employee lock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
         return employeeService.lock(id, token);
     }
 
     @PatchMapping("/{id}/unlock")
-    public Employee unlock(@PathVariable UUID id, @RequestBody String token) {
+    public Employee unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
         return employeeService.unlock(id, token);
     }
 }
