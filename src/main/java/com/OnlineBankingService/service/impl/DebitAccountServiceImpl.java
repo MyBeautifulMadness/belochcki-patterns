@@ -38,12 +38,12 @@ public class DebitAccountServiceImpl implements DebitAccountService {
 
     @Override
     @Transactional
-    public DebitAccountResponse open(UUID clientId, DebitAccountCreateRequest request) {
+    public DebitAccountResponse open(UUID clientId) {
         var nowDate = LocalDate.now();
         var nowTime = LocalTime.now().withNano(0);
 
         var account = DebitAccount.builder()
-                .clientId(request.clientId())
+                .clientId(clientId)
                 .createdDate(nowDate)
                 .createdTime(nowTime)
                 .balance(BigDecimal.ZERO.setScale(2))

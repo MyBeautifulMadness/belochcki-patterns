@@ -3,7 +3,6 @@ package com.OnlineBankingService.controller;
 import com.OnlineBankingService.domain.AccountType;
 import com.OnlineBankingService.domain.Role;
 import com.OnlineBankingService.dto.AccountOperationResponse;
-import com.OnlineBankingService.dto.DebitAccountCreateRequest;
 import com.OnlineBankingService.dto.DebitAccountResponse;
 import com.OnlineBankingService.dto.MoneyRequest;
 import com.OnlineBankingService.service.DebitAccountService;
@@ -23,8 +22,8 @@ public class DebitAccountController {
     private final DebitAccountService service;
 
     @PostMapping("/debit-accounts")
-    public DebitAccountResponse open(@PathVariable UUID clientId, @Valid @RequestBody DebitAccountCreateRequest request) {
-        return service.open(clientId, request);
+    public DebitAccountResponse open(@PathVariable UUID clientId) {
+        return service.open(clientId);
     }
 
     @PostMapping("/debit-accounts/{accountId}/deposit")

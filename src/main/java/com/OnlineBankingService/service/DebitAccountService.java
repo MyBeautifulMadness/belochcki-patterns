@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface DebitAccountService {
-    DebitAccountResponse open(UUID clientId, DebitAccountCreateRequest request);
+    DebitAccountResponse open(UUID clientId);
 
     DebitAccountResponse deposit(UUID accountId, MoneyRequest request, UUID clientId);
 
