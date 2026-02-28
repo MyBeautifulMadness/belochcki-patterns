@@ -152,4 +152,43 @@ public class AuthService {
 
         return true;
     }
+
+    public boolean validateClientOrEmployee(String token, UUID clientId) {
+        token = token.replace("Bearer ", "");
+        boolean clientValid = false;
+        boolean employeeValid = false;
+
+        try {
+            Client client = clientRepository.findById(clientId)
+                    .orElseThrow(() -> new RuntimeException("Client not found"));
+
+            if (!jwtService.isTokenExpired(token) &&
+                    jwtService.extractUserId(token).equals(client.id) &&
+                    token.equals(client.token) &&
+                    client.status != Status.LOCKED) {
+
+                clientValid = true;
+            }
+        } catch (RuntimeException e) {
+        }
+
+        try {
+            UUID employeeId = jwtService.extractUserId(token);
+            Employee employee = employeeRepository.findById(employeeId)
+                    .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+            if (!jwtService.isTokenExpired(token) &&
+                    employee.status != Status.LOCKED) {
+
+                employeeValid = true;
+            }
+        } catch (RuntimeException e) {
+        }
+
+        if (!clientValid && !employeeValid) {
+            throw new RuntimeException("Token is invalid for both client and employee");
+        }
+
+        return true;
+    }
 }

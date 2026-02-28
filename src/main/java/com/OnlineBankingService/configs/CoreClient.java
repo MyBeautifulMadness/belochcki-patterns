@@ -8,11 +8,7 @@ import com.OnlineBankingService.entities.AccountType;
 import com.OnlineBankingService.entities.Role;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.cloud.openfeign.SpringQueryMap;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,7 +33,7 @@ public interface CoreClient {
     List<AccountDto> getByClient(@PathVariable UUID clientId);
 
     @GetMapping("/clients/{clientId}/accounts/{accountId}/operations")
-    Page<AccountOperationResponse> operations(@PathVariable UUID clientId, @PathVariable UUID accountId,
+    PagedResponse<AccountOperationResponse> operations(@PathVariable UUID clientId, @PathVariable UUID accountId,
                                               Pageable pageable,
                                               @RequestParam Role role, @RequestParam AccountType accountType);
 
@@ -46,4 +42,10 @@ public interface CoreClient {
 
     @GetMapping("/admin/credit-accounts")
     PagedResponse<AccountDto> getAllCredit(Pageable pageable);
+
+    @GetMapping("/clients/{clientId}/credit-accounts/{accountId}")
+    AccountDto getByIdCredit(@PathVariable UUID clientId, @PathVariable UUID accountId, @RequestParam Role role);
+
+    @GetMapping("/clients/{clientId}/debit-accounts/{accountId}")
+    AccountDto getById(@PathVariable UUID clientId, @PathVariable UUID accountId, @RequestParam Role role);
 }

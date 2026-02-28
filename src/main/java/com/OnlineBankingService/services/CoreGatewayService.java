@@ -45,18 +45,38 @@ public class CoreGatewayService {
     }
 
     public List<AccountDto> getByClient(String token, UUID clientId) {
-        authService.validateTokenForClient(token, clientId);
+        authService.validateClientOrEmployee(token, clientId);
         return coreClient.getByClient(clientId);
     }
 
+    public AccountDto getByIdCredit(String token, UUID clientId, UUID accountId, Role role) {
+        authService.validateClientOrEmployee(token, clientId);
+        return coreClient.getByIdCredit(clientId, accountId, role);
+    }
+
+    public AccountDto getById(String token, UUID clientId, UUID accountId, Role role) {
+        authService.validateClientOrEmployee(token, clientId);
+        return coreClient.getById(clientId, accountId, role);
+    }
+
     public Page<AccountOperationResponse> operations(String token, UUID clientId, UUID accountId, Pageable pageable, AccountType type) {
-        authService.validateTokenForClient(token, clientId);
-        return coreClient.operations(clientId, accountId, pageable, Role.CLIENT, type);
+        authService.validateClientOrEmployee(token, clientId);
+        PagedResponse<AccountOperationResponse> response = coreClient.operations(clientId, accountId, pageable, Role.CLIENT, type);
+        return new PageImpl<>(
+                response.getContent(),
+                PageRequest.of(response.getPage(), response.getSize()),
+                response.getTotalElements()
+        );
     }
 
     public Page<AccountOperationResponse> employeeOperations(String token, UUID accountId, Pageable pageable, AccountType type) {
         authService.validateEmployeeByToken(token);
-        return coreClient.operations(UUID.randomUUID(), accountId, pageable, Role.EMPLOYEE, type);
+        PagedResponse<AccountOperationResponse> response = coreClient.operations(UUID.randomUUID(), accountId, pageable, Role.EMPLOYEE, type );
+        return new PageImpl<>(
+                response.getContent(),
+                PageRequest.of(response.getPage(), response.getSize()),
+                response.getTotalElements()
+        );
     }
 
     public Page<AccountDto> getAllDebit(String token, Pageable pageable){
@@ -71,7 +91,7 @@ public class CoreGatewayService {
 
     public Page<AccountDto> getAllCredit(String token, Pageable pageable){
         authService.validateEmployeeByToken(token);
-        PagedResponse<AccountDto> response = coreClient.getAllDebit(pageable);
+        PagedResponse<AccountDto> response = coreClient.getAllCredit(pageable);
         return new PageImpl<>(
                 response.getContent(),
                 PageRequest.of(response.getPage(), response.getSize()),

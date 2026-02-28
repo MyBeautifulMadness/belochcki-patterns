@@ -4,13 +4,12 @@ import com.OnlineBankingService.dtos.AccountDto;
 import com.OnlineBankingService.dtos.AccountOperationResponse;
 import com.OnlineBankingService.dtos.MoneyRequest;
 import com.OnlineBankingService.entities.AccountType;
+import com.OnlineBankingService.entities.Role;
 import com.OnlineBankingService.services.CoreGatewayService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -97,8 +96,6 @@ public class CoreGatewayController {
         );
     }
 
-    // -------------------- employee actions --------------------
-
     @GetMapping("/accounts/{accountId}/operations/employee")
     public Page<AccountOperationResponse> employeeOperations(
             @RequestHeader("Authorization") String authorization,
@@ -112,6 +109,16 @@ public class CoreGatewayController {
                 pageable,
                 type
         );
+    }
+
+    @GetMapping("/clients/{clientId}/credit-accounts/{accountId}")
+    public AccountDto getByIdCredit(@RequestHeader("Authorization") String authorization, @PathVariable UUID clientId, @PathVariable UUID accountId, @RequestParam Role role){
+        return gatewayService.getByIdCredit(extractToken(authorization), clientId, accountId, role);
+    }
+
+    @GetMapping("/clients/{clientId}/debit-accounts/{accountId}")
+    public AccountDto getById(@RequestHeader("Authorization") String authorization, @PathVariable UUID clientId, @PathVariable UUID accountId, @RequestParam Role role){
+        return gatewayService.getById(extractToken(authorization), clientId, accountId, role);
     }
 
     @GetMapping("/debit-accounts")
