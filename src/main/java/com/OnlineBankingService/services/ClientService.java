@@ -41,9 +41,10 @@ public class ClientService {
     }
 
     public Client update(UUID id, Client updated, String token) {
-        authService.validateTokenForClient(token, id);
+        authService.validateClientOrEmployee(token, id);
         Client client = findById(id);
         client.login = updated.login;
+        client.name = updated.name;
         client.password = updated.password;
         client.status = updated.status;
         return clientRepository.save(client);

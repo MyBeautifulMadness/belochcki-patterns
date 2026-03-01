@@ -33,6 +33,11 @@ public class EmployeeController {
         return employeeService.create(employee, authorization);
     }
 
+    @PostMapping("/test")
+    public Employee createTest(@RequestBody CreateEmployeeDto employee) {
+        return employeeService.createTest(employee);
+    }
+
     @PutMapping("/{id}")
     public Employee update(@RequestHeader("Authorization") String authorization, @PathVariable UUID id, @RequestBody Employee employee) {
         return employeeService.update(id, employee, authorization);

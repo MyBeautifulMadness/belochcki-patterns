@@ -40,10 +40,21 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
+    public Employee createTest(CreateEmployeeDto dto) {
+        Employee employee = new Employee();
+        employee.id = UUID.randomUUID();
+        employee.name = dto.name;
+        employee.login = dto.login;
+        employee.password = dto.password;
+        employee.status = Status.UNLOCKED;
+        return employeeRepository.save(employee);
+    }
+
     public Employee update(UUID id, Employee updated, String token) {
         authService.validateEmployeeByToken(token);
         Employee employee = findById(id);
         employee.login = updated.login;
+        employee.name = updated.name;
         employee.password = updated.password;
         employee.status = updated.status;
         return employeeRepository.save(employee);
