@@ -2,6 +2,7 @@ package com.OnlineBankingService.repository;
 
 import com.OnlineBankingService.entity.CreditAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -39,6 +40,7 @@ public interface CreditAccountRepository extends JpaRepository<CreditAccount, UU
     BigDecimal openAndAddToBalanceByClientId(@Param("clientId") UUID clientId,
                                              @Param("delta") BigDecimal delta);
 
+    @Modifying
     @Query(value = """
   UPDATE credit_account
   SET status = 'CLOSED'
