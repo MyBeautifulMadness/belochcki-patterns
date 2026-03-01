@@ -52,9 +52,9 @@ public interface CoreClient {
     @GetMapping("/clients/{clientId}/credit-account")
     AccountDto getMyCreditAccount(@PathVariable UUID clientId);
 
-    @PostMapping("/credit-accounts/{accountId}/withdraw")
+    @PostMapping("/clients/{clientId}/credit-accounts/{accountId}/withdraw")
     AccountDto withdrawCredit(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request);
 
-    @GetMapping("/credit-accounts/{accountId}/operations")
+    @GetMapping("/clients/{clientId}/credit-accounts/{accountId}/operations")
    PagedResponse<AccountOperationResponse> operationsCredit(@PathVariable UUID clientId, @PathVariable UUID accountId, Pageable pageable);
 }

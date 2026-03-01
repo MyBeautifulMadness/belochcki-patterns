@@ -126,13 +126,13 @@ public class CoreGatewayController {
         return gatewayService.getMyCreditAccount(extractToken(authorization), clientId);
     }
 
-    @PostMapping("/credit-accounts/{accountId}/withdraw")
+    @PostMapping("/clients/{clientId}/credit-accounts/{accountId}/withdraw")
     public AccountDto withdrawCredit(@RequestHeader("Authorization") String authorization, @PathVariable UUID clientId,
                                      @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request){
         return gatewayService.withdrawCredit(extractToken(authorization), clientId, accountId, request);
     }
 
-    @GetMapping("/credit-accounts/{accountId}/operations")
+    @GetMapping("/clients/{clientId}/credit-accounts/{accountId}/operations")
     Page<AccountOperationResponse> operationsCredit(@RequestHeader("Authorization") String authorization,
                                                     @PathVariable UUID clientId, @PathVariable UUID accountId,
                                                     Pageable pageable){
