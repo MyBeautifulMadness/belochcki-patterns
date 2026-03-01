@@ -11,13 +11,15 @@ const profileButton = document.getElementById('profileButton');
 const logoutButton = document.getElementById('logoutButton');
 const userMenu = document.getElementById('userMenu');
 let userMenuListenerAttached = false;
+const API_BASE = "http://localhost:8085/api";
+const ClientID = localStorage.getItem('userId');
 
-function activate(email){
+function activate(){
   if (!userMenuListenerAttached) {
     loginButton.addEventListener('click', () => {
     userMenu.style.display = userMenu.style.display === 'block' ? 'none' : 'block';
     });
-    loginButton.textContent = email + ' ▾';
+    loginButton.textContent = 'Возможности ▾';
     profileButton.style.display = 'inline-block';
     logoutButton.style.display = 'inline-block';
 
@@ -26,8 +28,8 @@ function activate(email){
     });
 
     logoutButton.addEventListener('click', () => {
-      fetch('http://localhost:8080/auth/logout', {  
-        method: 'DELETE',  
+      fetch(`${API_BASE}/auth/logout`, {  
+        method: 'POST',  
         headers: {  
           Authorization: `Bearer ${localStorage.getItem('token')}`
         },  
@@ -38,6 +40,15 @@ function activate(email){
       });  
       localStorage.removeItem('token');
       window.location.href = '../pages/login.html'
+    });
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (userMenu.style.display === 'block' &&
+          target !== userMenu &&
+          !userMenu.contains(target) &&
+          target !== loginButton) {
+        userMenu.style.display = 'none';
+      }
     });
     userMenuListenerAttached = true;
   }

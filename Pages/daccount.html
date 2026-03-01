@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../Styles/accounts.css">
+  <link rel="stylesheet" href="../Styles/daccount.css">
   <link rel="stylesheet" href="../Styles/general.css">
   <title>Copy page</title>
 </head>
@@ -12,6 +12,7 @@
     <div class="log">
       <img src="../sorces/logo.png" id="logoimg">
       <a href="../Pages/main.html" class="return">Главная</a>
+      <a href="../Pages/accounts.html" class="return">Назад</a>
     </div>
     <span type="submit"  id="in">Вход</span>
     <div id="userMenu" style="display: none">
@@ -23,30 +24,15 @@
     <div class="block-column">
       <div class="block-row">
         <div class="block-column">
-          <div class="block-row">
-            <div class="info-text">Ваши дебетовые счета.</div> 
-            <button id="openAccountButton" onclick=creatDebitAccount()>Открыть новый дебетовый счет</button>
-          </div>
           <div id="DebitAccount-container">
             <template id="DebitAccount-template">
               <div class="DebitAccount-block">
                 <div class="name"></div>
                 <div class="balance"></div>
                 <div class="status"></div>
-                <div class="createdDate"></div>
-              </div>
-            </template>
-          </div>
-        </div> 
-        <div class="block-column">
-          <div class="info-text">Ваши кредитные счета.</div> 
-          <div id="CreditAccount-container">
-            <template id="CreditAccount-template">
-              <div class="CreditAccount-block">
-                <div class="name"></div>
-                <div class="balance"></div>
-                <div class="status"></div>
-                <div class="createdDate"></div>
+                <div class="block-row">
+                  <div class="createdDate"></div>
+                </div>
               </div>
             </template>
           </div>
@@ -57,6 +43,6 @@
   <footer>
     <div class="foot-text">© 2026 - Belochka</div> 
   </footer>
-  <script src="../Scripts/accounts.js"></script>
+  <script src="../Scripts/daccount.js"></script>
 </body>
 </html>

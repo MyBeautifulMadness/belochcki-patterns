@@ -25,7 +25,6 @@
   color: red;
 }
 
-#DebitAccount-container,
 #CreditAccount-container {
   margin: 0 auto;
   margin-bottom: 20px;
@@ -35,7 +34,6 @@
   width: 75%;
 }
 
-.DebitAccount-block,
 .CreditAccount-block{
   padding: 0;
   color: white;
@@ -50,10 +48,6 @@
   flex-direction: column;
 }
 
-.DebitAccount-blocks .type,
-.DebitAccount-blocks .description,
-.DebitAccount-blocks .startDate,
-.DebitAccount-blocks .endDate,
 .CreditAccount-blocks .type,
 .CreditAccount-blocks .description,
 .CreditAccount-blocks .startDate,

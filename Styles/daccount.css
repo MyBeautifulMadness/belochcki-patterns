@@ -25,8 +25,7 @@
   color: red;
 }
 
-#DebitAccount-container,
-#CreditAccount-container {
+#DebitAccount-container {
   margin: 0 auto;
   margin-bottom: 20px;
   display: flex;
@@ -35,8 +34,7 @@
   width: 75%;
 }
 
-.DebitAccount-block,
-.CreditAccount-block{
+.DebitAccount-block{
   padding: 0;
   color: white;
   border-radius: 5px;
@@ -53,10 +51,6 @@
 .DebitAccount-blocks .type,
 .DebitAccount-blocks .description,
 .DebitAccount-blocks .startDate,
-.DebitAccount-blocks .endDate,
-.CreditAccount-blocks .type,
-.CreditAccount-blocks .description,
-.CreditAccount-blocks .startDate,
-.CreditAccount-blocks .endDate{  
+.DebitAccount-blocks .endDate{  
   margin: 5px 15px;
 }
