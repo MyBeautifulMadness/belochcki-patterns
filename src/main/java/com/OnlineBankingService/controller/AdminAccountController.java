@@ -2,6 +2,7 @@ package com.OnlineBankingService.controller;
 
 import com.OnlineBankingService.dto.CreditAccountResponse;
 import com.OnlineBankingService.dto.DebitAccountResponse;
+import com.OnlineBankingService.repository.CreditAccountRepository;
 import com.OnlineBankingService.repository.DebitAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminAccountController {
 
     private final DebitAccountRepository accountRepository;
+    private final CreditAccountRepository creditAccountRepository;
 
     @GetMapping("/debit-accounts")
     public Page<DebitAccountResponse> getAllDebit(Pageable pageable) {
@@ -33,7 +35,7 @@ public class AdminAccountController {
 
     @GetMapping("/credit-accounts")
     public Page<CreditAccountResponse> getAllCredit(Pageable pageable) {
-        return accountRepository.findAll(pageable)
+        return creditAccountRepository.findAll(pageable)
                 .map(a -> new CreditAccountResponse(
                         a.getId(),
                         a.getClientId(),
