@@ -1,8 +1,9 @@
+const API_BASE = "http://localhost:8085/api";
 window.addEventListener('load', async() => {
   const token = localStorage.getItem('token');
   if (!token) return;
   try {
-    const res = await fetch('http://localhost:8085/api/auth/validate', {
+    const res = await fetch(`${API_BASE}/auth/validate`, {
       method: 'POST',
       headers: {
         'Authorization': token
@@ -32,7 +33,7 @@ function a(){
     return; 
   } 
   else{
-    fetch('http://localhost:8085/api/auth/login', { 
+    fetch(`${API_BASE}/auth/login`, { 
       method: 'POST', 
       headers: { 
         'Content-Type': 'application/json' 

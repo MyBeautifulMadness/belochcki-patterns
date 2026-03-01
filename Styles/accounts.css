@@ -37,12 +37,11 @@
 
 .DebitAccount-block,
 .CreditAccount-block{
-  padding: 0;
-  color: white;
+  color: gold;
+  text-shadow: 1px 2px 2px 4px #000000;;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
   padding: 15px;
-  
   cursor: pointer;
   font-size: 16px;
   line-height: 1.5;
@@ -50,13 +49,35 @@
   flex-direction: column;
 }
 
-.DebitAccount-blocks .type,
-.DebitAccount-blocks .description,
-.DebitAccount-blocks .startDate,
-.DebitAccount-blocks .endDate,
-.CreditAccount-blocks .type,
-.CreditAccount-blocks .description,
-.CreditAccount-blocks .startDate,
-.CreditAccount-blocks .endDate{  
+.DebitAccount-block .name,
+.DebitAccount-block .balance,
+.DebitAccount-block .status,
+.DebitAccount-block .createdDate,
+.CreditAccount-block .name,
+.CreditAccount-block .balance,
+.CreditAccount-block .status,
+.CreditAccount-block .createdDate{  
   margin: 5px 15px;
+}
+
+.DebitAccount-block .createdDate{
+  margin-right: auto;
+}
+
+#openAccountButton{
+  
+  background: none;
+  color: rgb(27, 100, 49);
+  border-radius: 5px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
+  padding: 5px;
+  cursor: pointer;
+}
+
+.DebitAccount-block .deleteDebitAccount{
+  color: red;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+  padding: 5px;
+  cursor: pointer;
 }

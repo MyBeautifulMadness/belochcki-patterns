@@ -46,11 +46,11 @@
   line-height: 1.5;
   display: flex;
   flex-direction: column;
-}
+} 
 
-.CreditAccount-blocks .type,
-.CreditAccount-blocks .description,
-.CreditAccount-blocks .startDate,
-.CreditAccount-blocks .endDate{  
+.CreditAccount-block .name,
+.CreditAccount-block .balance,
+.CreditAccount-block .status,
+.CreditAccount-block .createdDate{  
   margin: 5px 15px;
 }

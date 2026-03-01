@@ -1,5 +1,7 @@
 const DebitAccountContainer = document.getElementById('DebitAccount-container'); 
 const DebitAccountTemplate = document.getElementById('DebitAccount-template');
+const OperstionsContainer = document.getElementById('Operstions-container'); 
+const OperstionsTemplate = document.getElementById('Operstions-template');
 
 const loginButton = document.getElementById('in');
 const profileButton = document.getElementById('profileButton');
@@ -48,18 +50,32 @@ function activate(){
     userMenuListenerAttached = true;
   }
 }
-window.addEventListener('load', () => {
-    const authToken = localStorage.getItem('token');
-    if (authToken) {
-      console.log('Токен получен из localStorage:', localStorage.getItem('token'));
-      email=localStorage.getItem('email')
-      document.getElementById('in').textContent=email;
-      activate(email);
-      loadDebitAccounts()
+
+window.addEventListener('load', async() => {
+  const token = localStorage.getItem('token');
+  alert
+  if (!token) window.location.href = '../pages/login.html';
+  try {
+    const res = await fetch(`${API_BASE}/auth/validate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token })
+    });
+    if (res.ok) {
+      console.log('Токен валиден');
+      
+      activate();
+      loadDebitAccount()
+      loadOperstions()
     } else {
-      console.log('Токен не найден в localStorage.');
-      //window.location.href = '../pages/login.html'
+      console.log('Токен невалиден');
+      localStorage.clear();
     }
+  } catch (e) {
+    console.error('Ошибка при проверке токена', e);
+    localStorage.clear();
+    alert('1');
+  }
 });
 
 function formatDate(dateString) { 
@@ -71,11 +87,9 @@ function formatDate(dateString) {
   return `${year}-${month}-${day}`; 
 } 
  
-function loadDebitAccounts() {
-
-  DebitAccountContainer.innerHTML = '';
-
-  fetch('http://localhost:8080/DebitAccounts', { 
+function loadDebitAccount() {
+  DebitAccountContainer.innerHTML = '';  
+  fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/debit-accounts/${localStorage.getItem('selectedAccount')}?role=CLIENT`, { 
     method: 'GET', 
     headers: { 
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -90,27 +104,58 @@ function loadDebitAccounts() {
   }) 
   .then(data => {
     console.log(data);
-    //const DebitAccount = data.list;*/
-    data.forEach(accounts => {
-      const DebitAccountBlock = DebitAccountTemplate.content.cloneNode(true);
-      
-      DebitAccountBlock.querySelector('.name').textContent =  `Номер счёта: ${accounts.name}`;
-      DebitAccountBlock.querySelector('.balance').textContent = `Сумма на счету: ${accounts.balance} ₽.`;
-      DebitAccountBlock.querySelector('.createdDate').textContent =  `Дата создания счета: ${formatDate(accounts.createdDate)}.`;
-      if(accounts.status == 'open'){
-        DebitAccountBlock.querySelector('.status').textContent =  `Этот счет открыт.`;
-      }else{
-        DebitAccountBlock.querySelector('.status').textContent =  `Этот счет закрыт.`;
-      }
-      DebitAccountBlock.querySelector('.DebitAccount-block').addEventListener('click', () => { 
-        localStorage.setItem('selectedAccount', accounts.id); 
-        window.location.href = '../pages/daccount.html'; 
-      });
-      DebitAccountContainer.appendChild(DebitAccountBlock);     
-    });
+    const DebitAccountBlock = DebitAccountTemplate.content.cloneNode(true);
+    
+    DebitAccountBlock.querySelector('.name').textContent =  `Номер счёта: ${data.name}`;
+    DebitAccountBlock.querySelector('.balance').textContent = `Сумма на счету: ${data.balance} ₽.`;
+    DebitAccountBlock.querySelector('.createdDate').textContent =  `Дата создания счета: ${formatDate(data.createdDate)}.`;
+    if(data.status == 'OPEN'){
+      DebitAccountBlock.querySelector('.status').textContent =  `Этот счет открыт.`;
+    }else{
+      DebitAccountBlock.querySelector('.status').textContent =  `Этот счет закрыт.`;
+      DebitAccountBlock.querySelector('.deleteDebitAccount').style.display = 'none';
+    }
+    DebitAccountContainer.appendChild(DebitAccountBlock);     
   })
   .catch(error => { 
-    console.error('Ошибка получения дебетовова счета:', error); 
-    alert('Ошибка получения списка дебетовова счета: ' + error);
+    console.error('Ошибка получения списка дебетовых счетов:', error); 
+    alert('Ошибка получения списка дебетовых счетов: ' + error);
+  }); 
+}
+
+function loadOperstions() {
+  OperstionsContainer.innerHTML = '';  
+  fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/accounts/${localStorage.getItem('selectedAccount')}/operations?accountType=DEBIT&page=0&size=1&sort=ASC`, { 
+    method: 'GET', 
+    headers: { 
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json' 
+    },      
+  })
+  .then(response => { 
+    if (!response.ok) {
+      return response.text().then(text => { throw new Error(text) }); 
+    } 
+    return response.json();
+  }) 
+  .then(data => {
+    console.log(data);
+    const content = data.content;
+    content.forEach(Operstion => {
+      const OperstionsBlock = OperstionsTemplate.content.cloneNode(true);
+      OperstionsBlock.querySelector('.comment').textContent =  `Результат: ${Operstion.comment}`;
+      OperstionsBlock.querySelector('.operationType').textContent =  `Тип операции: ${Operstion.operationType}`;
+      OperstionsBlock.querySelector('.time').textContent =  `Время операции: ${Operstion.time}`;
+      OperstionsBlock.querySelector('.amount').textContent = `Сумма перевода: ${Operstion.amount} ₽.`;
+      OperstionsBlock.querySelector('.date').textContent =  `Дата операции: ${formatDate(Operstion.date)}.`;
+      if(Operstion.operationType == 'OPEN' || Operstion.operationType == 'CLOSE'){
+        OperstionsBlock.querySelector('.amount').style.display = 'none';
+      }
+      OperstionsContainer.appendChild(OperstionsBlock);  
+    })   
+  })
+  .catch(error => { 
+    console.error('Ошибка получения списка операций дебетового счета:', error); 
+    alert('Ошибка получения списка операций дебетового счета: ' + error);
   }); 
 }

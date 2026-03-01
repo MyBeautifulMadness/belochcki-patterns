@@ -22,21 +22,35 @@
   </header>
   <main>
     <div class="block-column">
-      <div class="block-row">
-        <div class="block-column">
-          <div id="DebitAccount-container">
-            <template id="DebitAccount-template">
-              <div class="DebitAccount-block">
-                <div class="name"></div>
-                <div class="balance"></div>
-                <div class="status"></div>
-                <div class="block-row">
-                  <div class="createdDate"></div>
-                </div>
-              </div>
-            </template>
+      <div class="info-text">Это ваш дебетовый счет:</div> 
+  
+      <div id="DebitAccount-container">
+        <template id="DebitAccount-template">
+          <div class="DebitAccount-block">
+            <div class="name"></div>
+            <div class="balance"></div>
+            <div class="status"></div>
+            <div class="createdDate"></div>
           </div>
-        </div> 
+        </template>
+      </div>
+      <div class="info-text">Вы можете:</div> 
+      <div class="block-row">
+        <button id="openAccountButton" onclick=deposit()>Пополнить счёт</button>
+        <div class="info-text">и</div> 
+        <button id="openAccountButton" onclick=withdraw()>Снять с него деньги</button>
+      </div>
+      <div class="info-text">Операции этого счёта:</div> 
+      <div id="Operstions-container">
+        <template id="Operstions-template">
+          <div class="Operstions-block">
+            <div class="date"></div>
+            <div class="time"></div>
+            <div class="amount"></div>
+            <div class="operationType"></div>
+            <div class="comment"></div>
+          </div>
+        </template>
       </div>
     </div>
   </main>

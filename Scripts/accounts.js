@@ -52,18 +52,30 @@ function activate(){
   }
 }
 
-window.addEventListener('load', () => {
-    const authToken = localStorage.getItem('token');
-    if (authToken) {
-      console.log('Токен получен из localStorage:', localStorage.getItem('token'));
+window.addEventListener('load', async() => {
+  const token = localStorage.getItem('token');
+  if (!token) window.location.href = '../pages/login.html';
+  try {
+    const res = await fetch(`${API_BASE}/auth/validate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token })
+    });
+    if (res.ok) {
+      console.log('Токен валиден');
       
       activate();
       loadDebitAccounts()
       loadCreditAccounts()
     } else {
-      console.log('Токен не найден в localStorage.');
-      //window.location.href = '../pages/login.html'
+      console.log('Токен невалиден');
+      localStorage.clear();
     }
+  } catch (e) {
+    console.error('Ошибка при проверке токена', e);
+    localStorage.clear();
+    window.location.href = '../pages/login.html';
+  }
 });
 
 function formatDate(dateString) { 
@@ -104,10 +116,14 @@ function loadDebitAccounts() {
         DebitAccountBlock.querySelector('.status').textContent =  `Этот счет открыт.`;
       }else{
         DebitAccountBlock.querySelector('.status').textContent =  `Этот счет закрыт.`;
+        DebitAccountBlock.querySelector('.deleteDebitAccount').style.display = 'none';
       }
       DebitAccountBlock.querySelector('.DebitAccount-block').addEventListener('click', () => { 
         localStorage.setItem('selectedAccount', accounts.id); 
         window.location.href = '../pages/daccount.html'; 
+      });
+      DebitAccountBlock.querySelector('.deleteDebitAccount').addEventListener('click', () => { 
+        deleteDebitAccount(accounts.id);
       });
       DebitAccountContainer.appendChild(DebitAccountBlock);     
     });
@@ -158,6 +174,8 @@ function loadCreditAccounts() {
   }); 
 }
 
+
+
 function creatDebitAccount() {
   fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/debit-accounts`, { 
     method: 'POST', 
@@ -174,7 +192,28 @@ function creatDebitAccount() {
     return response.json();
   }) 
   .catch(error => { 
-    console.error('Ошибка получения информации о кредитном счёте:', error); 
-    alert('Ошибка получения информации о кредитном счёте: ' + error);
+    console.error('Ошибка создания дебетого счёта:', error); 
+    alert('Ошибка создания дебетого счёта: ' + error);
+  }); 
+}
+
+function deleteDebitAccount(id) {
+  fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/debit-accounts/${id}/close`, { 
+    method: 'POST', 
+    headers: { 
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json' 
+    },      
+  })
+  .then(response => { 
+    if (!response.ok) {
+      return response.text().then(text => { throw new Error(text) }); 
+    } 
+    loadDebitAccounts()
+    return response.json();
+  }) 
+  .catch(error => { 
+    console.error('Ошибка закрытия дебетого счёта:', error); 
+    alert('Ошибка закрытия дебетого счёта: ' + error);
   }); 
 }
