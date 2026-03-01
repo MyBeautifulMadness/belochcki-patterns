@@ -113,10 +113,6 @@ function loadDebitAccounts() {
       }else{
         DebitAccountBlock.querySelector('.status').textContent =  `Этот счет закрыт.`;
       }
-      DebitAccountBlock.querySelector('.DebitAccount-block').addEventListener('click', () => { 
-        localStorage.setItem('selectedAccount', accounts.id); 
-        window.location.href = '../pages/daccount.html'; 
-      });
       DebitAccountContainer.appendChild(DebitAccountBlock);     
     });
   })
@@ -164,10 +160,6 @@ function loadCreditAccounts() {
         }else{
         CreditAccountBlock.querySelector('.status').textContent =  `Этот счет закрыт.`;
         }
-        CreditAccountBlock.querySelector('.CreditAccount-block').addEventListener('click', () => { 
-        localStorage.setItem('selectedAccount', account.id); 
-        window.location.href = '../pages/caccount.html'; 
-        });
 
         CreditAccountContainer.appendChild(CreditAccountBlock);
     })     
