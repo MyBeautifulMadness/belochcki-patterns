@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../Styles/creditOperations.css">
+  <link rel="stylesheet" href="../Styles/general.css">
+  <title>История операций по кредиту</title>
+</head>
+<body>
+<header>
+  <div class="log">
+    <img src="../sorces/logo.png" id="logoimg">
+    <a href="../Pages/clientCredits.html" class="return">Назад к кредитам</a>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <h1>История операций</h1>
+
+    <div class="filters">
+      <h3>Фильтры</h3>
+
+      <div class="filter-grid">
+        <select id="operationType">
+          <option value="">Тип операции</option>
+          <option value="REPAYMENT">Платёж</option>
+          <option value="ISSUANCE">Начисление</option>
+          <option value="CLOSING">Закрытие</option>
+        </select>
+
+        <input type="date" id="dateFrom">
+        <input type="date" id="dateTo">
+
+        <input type="number" id="amountFrom" placeholder="Сумма от">
+        <input type="number" id="amountTo" placeholder="Сумма до">
+
+        <select id="sortBy">
+          <option value="">Сортировать по</option>
+          <option value="date">Дата</option>
+          <option value="amount">Сумма</option>
+        </select>
+
+        <select id="direction">
+          <option value="asc">По возрастанию</option>
+          <option value="desc">По убыванию</option>
+
+        </select>
+
+        <input type="number" id="pageSize" value="5" min="1">
+      </div>
+
+      <button id="applyFilters">Применить</button>
+
+      <button id="repay" onclick=creditrepay()>Погасить кредит</button>
+      <input type="Daccaunt" id="Daccaunt" placeholder="3fa85f64-5717-4562-b3fc-2c963f66afa6"> 
+      <input type="amount" id="amount" placeholder="1000"> 
+    </div>
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="createTitle">Создание кредитного тарифа</h2>
+
+        <form id="createTariffForm">
+          <label>Название тарифа:</label>
+          <input type="text" id="name" required>
+
+          <label>Описание:</label>
+          <textarea id="description" required></textarea>
+
+          <label>Сумма от:</label>
+          <input type="number" id="amountFrom" required>
+
+          <label>Сумма до:</label>
+          <input type="number" id="amountTo" required>
+
+          <label>Процентная ставка:</label>
+          <input type="number" id="interestRate" required>
+
+          <button type="submit" class="submit-btn">Создать</button>
+        </form>
+      </div>
+    </div>
+    <div id="operationList"></div>
+    <div id="pagination" class="pagination"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-text">© 2026 - Belochka</div>
+</footer>
+
+<script src="../Scripts/creditOperations.js"></script>
+</body>
+</html>

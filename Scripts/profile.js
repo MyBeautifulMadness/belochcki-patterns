@@ -69,6 +69,7 @@ window.addEventListener('load', () => {
     email=localStorage.getItem('email') 
     document.getElementById('in').textContent=email; 
     activate(email); 
+    return
     fetch('http://localhost:8080/auth/profile', {  
       method: 'GET',  
       headers: {  

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../Styles/main copy.css">
+  <link rel="stylesheet" href="../Styles/general.css">
+  <title>Copy page</title>
+</head>
+<body>
+  <header>
+    <div class="log">
+      <img src="../sorces/logo.png" id="logoimg">
+      <a href="../Pages/main.html" class="return">Главная</a>
+    </div>
+    <span type="submit"  id="in">Вход</span>
+    <div id="userMenu" style="display: none">
+      <button id="profileButton">Личный кабинет</button>
+      <button id="logoutButton">Выход</button>
+  </div>
+  </header>
+  <main>
+    <div class="block-column">
+          <div class="block-row">
+            <div class="info-text">Ваши кредиты.</div> 
+          </div>
+          <div id="Credit-container">
+            <template id="Credit-template">
+              <div class="Credit-block">
+                <div class="name"></div>
+                <div class="balance"></div>
+                <div class="status"></div>
+                <div class="block-row">
+                  <div class="createdDate"></div>
+                  <div class="wisdowcredit">Погасить этот кредит.</div> 
+                </div>          
+              </div>
+            </template>
+          </div>
+        </div> 
+
+  </main>
+  <footer>
+    <div class="foot-text">© 2026 - Belochka</div> 
+  </footer>
+  <script src="../Scripts/main copy.js"></script>
+</body>
+</html>

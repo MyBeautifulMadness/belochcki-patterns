@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../Styles/creditTariffsList.css">
+  <link rel="stylesheet" href="../Styles/general.css">
+  <title>Кредитные тарифы</title>
+</head>
+<body>
+
+<header>
+  <div class="log">
+    <img src="../sorces/logo.png" id="logoimg">
+    <a href="../Pages/main.html" class="return">Главная</a>
+  </div>
+  <span id="in">Вход</span>
+  <div id="userMenu" style="display:none">
+    <button id="profileButton">Личный кабинет</button>
+    <button id="logoutButton">Выход</button>
+  </div>
+</header>
+
+<main>
+  <div class="block-column">
+    <div class="info-text">Доступные кредитные тарифы</div>
+
+    <div class="filters">
+  <h3>Фильтры</h3>
+
+  <div class="filter-grid">
+    <input type="text" id="filterName" placeholder="Название">
+    <input type="text" id="filterDescription" placeholder="Описание">
+
+    <input type="number" id="amountFrom" placeholder="Сумма от">
+    <input type="number" id="amountTo" placeholder="Сумма до">
+
+    <input type="number" id="interestRate" placeholder="Процент">
+
+    <select id="sortBy">
+      <option value="">Сортировать по</option>
+      <option value="name">Название</option>
+      <option value="amountFrom">Сумма от</option>
+      <option value="amountTo">Сумма до</option>
+      <option value="interestRate">Процент</option>
+    </select>
+
+    <select id="direction">
+      <option value="asc">По возрастанию</option>
+      <option value="desc">По убыванию</option>
+    </select>
+
+    <input type="number" id="pageSize" placeholder="Размер страницы" value="5" min="1">
+  </div>
+
+  <button id="applyFilters">Применить</button>
+</div>
+    <div id="tariffList"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-text">© 2026 - Belochka</div> 
+</footer>
+
+<script src="../Scripts/creditTariffsList.js"></script>
+</body>
+</html>

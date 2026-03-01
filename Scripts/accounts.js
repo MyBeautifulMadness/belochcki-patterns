@@ -65,7 +65,7 @@ window.addEventListener('load', async() => {
       console.log('Токен валиден');
       
       activate();
-      loadDebitAccounts()
+      loadCredits()
       loadCreditAccounts()
     } else {
       console.log('Токен невалиден');
@@ -87,7 +87,7 @@ function formatDate(dateString) {
   return `${year}-${month}-${day}`; 
 } 
  
-function loadDebitAccounts() {
+function loadCredits() {
   DebitAccountContainer.innerHTML = '';  
 
   fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/debit-accounts`, { 
@@ -188,7 +188,7 @@ function creatDebitAccount() {
     if (!response.ok) {
       return response.text().then(text => { throw new Error(text) }); 
     } 
-    loadDebitAccounts()
+    loadCredits()
     return response.json();
   }) 
   .catch(error => { 
@@ -209,7 +209,7 @@ function deleteDebitAccount(id) {
     if (!response.ok) {
       return response.text().then(text => { throw new Error(text) }); 
     } 
-    loadDebitAccounts()
+    loadCredits()
     return response.json();
   }) 
   .catch(error => { 
