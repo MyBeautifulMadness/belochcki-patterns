@@ -3,6 +3,7 @@ package com.OnlineBankingService.controllers;
 import com.OnlineBankingService.dtos.AccountDto;
 import com.OnlineBankingService.dtos.AccountOperationResponse;
 import com.OnlineBankingService.dtos.MoneyRequest;
+import com.OnlineBankingService.dtos.PagedResponse;
 import com.OnlineBankingService.entities.AccountType;
 import com.OnlineBankingService.entities.Role;
 import com.OnlineBankingService.services.CoreGatewayService;
@@ -26,13 +27,10 @@ public class CoreGatewayController {
         this.gatewayService = gatewayService;
     }
 
-    // -------------------- helpers --------------------
 
     private String extractToken(String authorization) {
         return authorization.replace("Bearer ", "");
     }
-
-    // -------------------- client actions --------------------
 
     @PostMapping("/clients/{clientId}/debit-accounts")
     public AccountDto openAccount(
@@ -96,21 +94,6 @@ public class CoreGatewayController {
         );
     }
 
-    @GetMapping("/accounts/{accountId}/operations/employee")
-    public Page<AccountOperationResponse> employeeOperations(
-            @RequestHeader("Authorization") String authorization,
-            @PathVariable UUID accountId,
-            @RequestParam AccountType type,
-            Pageable pageable
-    ) {
-        return gatewayService.employeeOperations(
-                extractToken(authorization),
-                accountId,
-                pageable,
-                type
-        );
-    }
-
     @GetMapping("/clients/{clientId}/credit-accounts/{accountId}")
     public AccountDto getByIdCredit(@RequestHeader("Authorization") String authorization, @PathVariable UUID clientId, @PathVariable UUID accountId, @RequestParam Role role){
         return gatewayService.getByIdCredit(extractToken(authorization), clientId, accountId, role);
@@ -135,6 +118,25 @@ public class CoreGatewayController {
             Pageable pageable
     ) {
         return gatewayService.getAllCredit(extractToken(authorization), pageable);
+    }
+
+
+    @GetMapping("/clients/{clientId}/credit-account")
+    public AccountDto getMyCreditAccount(@RequestHeader("Authorization") String authorization, @PathVariable UUID clientId){
+        return gatewayService.getMyCreditAccount(extractToken(authorization), clientId);
+    }
+
+    @PostMapping("/credit-accounts/{accountId}/withdraw")
+    public AccountDto withdrawCredit(@RequestHeader("Authorization") String authorization, @PathVariable UUID clientId,
+                                     @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request){
+        return gatewayService.withdrawCredit(extractToken(authorization), clientId, accountId, request);
+    }
+
+    @GetMapping("/credit-accounts/{accountId}/operations")
+    Page<AccountOperationResponse> operationsCredit(@RequestHeader("Authorization") String authorization,
+                                                    @PathVariable UUID clientId, @PathVariable UUID accountId,
+                                                    Pageable pageable){
+        return gatewayService.operationsCredit(extractToken(authorization), clientId, accountId, pageable);
     }
 
 

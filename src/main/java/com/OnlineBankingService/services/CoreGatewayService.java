@@ -7,8 +7,11 @@ import com.OnlineBankingService.dtos.MoneyRequest;
 import com.OnlineBankingService.dtos.PagedResponse;
 import com.OnlineBankingService.entities.AccountType;
 import com.OnlineBankingService.entities.Role;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.UUID;
@@ -69,16 +72,6 @@ public class CoreGatewayService {
         );
     }
 
-    public Page<AccountOperationResponse> employeeOperations(String token, UUID accountId, Pageable pageable, AccountType type) {
-        authService.validateEmployeeByToken(token);
-        PagedResponse<AccountOperationResponse> response = coreClient.operations(UUID.randomUUID(), accountId, pageable, Role.EMPLOYEE, type );
-        return new PageImpl<>(
-                response.getContent(),
-                PageRequest.of(response.getPage(), response.getSize()),
-                response.getTotalElements()
-        );
-    }
-
     public Page<AccountDto> getAllDebit(String token, Pageable pageable){
         authService.validateEmployeeByToken(token);
         PagedResponse<AccountDto> response = coreClient.getAllDebit(pageable);
@@ -92,6 +85,28 @@ public class CoreGatewayService {
     public Page<AccountDto> getAllCredit(String token, Pageable pageable){
         authService.validateEmployeeByToken(token);
         PagedResponse<AccountDto> response = coreClient.getAllCredit(pageable);
+        return new PageImpl<>(
+                response.getContent(),
+                PageRequest.of(response.getPage(), response.getSize()),
+                response.getTotalElements()
+        );
+    }
+
+    public AccountDto getMyCreditAccount(String token, UUID clientId){
+        authService.validateTokenForClient(token, clientId);
+        return coreClient.getMyCreditAccount(clientId);
+    }
+
+    public AccountDto withdrawCredit( String token, UUID clientId,
+                                     UUID accountId, MoneyRequest request){
+        authService.validateTokenForClient(token, clientId);
+        return coreClient.withdrawCredit(clientId, accountId, request);
+    }
+
+    public Page<AccountOperationResponse> operationsCredit(String token, UUID clientId,
+                                                           UUID accountId, Pageable pageable){
+        authService.validateTokenForClient(token, clientId);
+        PagedResponse<AccountOperationResponse> response = coreClient.operationsCredit(clientId, accountId, pageable);
         return new PageImpl<>(
                 response.getContent(),
                 PageRequest.of(response.getPage(), response.getSize()),
