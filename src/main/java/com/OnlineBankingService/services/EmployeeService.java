@@ -29,7 +29,8 @@ public class EmployeeService {
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
     }
 
-    public Employee create(CreateEmployeeDto dto) {
+    public Employee create(CreateEmployeeDto dto, String token) {
+        authService.validateEmployeeByToken(token);
         Employee employee = new Employee();
         employee.id = UUID.randomUUID();
         employee.name = dto.name;
@@ -39,7 +40,8 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
-    public Employee update(UUID id, Employee updated) {
+    public Employee update(UUID id, Employee updated, String token) {
+        authService.validateEmployeeByToken(token);
         Employee employee = findById(id);
         employee.login = updated.login;
         employee.password = updated.password;
@@ -47,7 +49,8 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
-    public void delete(UUID id) {
+    public void delete(UUID id, String token) {
+        authService.validateEmployeeByToken(token);
         employeeRepository.deleteById(id);
     }
 

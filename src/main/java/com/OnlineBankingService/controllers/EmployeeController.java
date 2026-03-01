@@ -29,18 +29,18 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public Employee create(@RequestBody CreateEmployeeDto employee) {
-        return employeeService.create(employee);
+    public Employee create(@RequestBody CreateEmployeeDto employee, @RequestHeader("Authorization") String authorization) {
+        return employeeService.create(employee, authorization);
     }
 
     @PutMapping("/{id}")
-    public Employee update(@PathVariable UUID id, @RequestBody Employee employee) {
-        return employeeService.update(id, employee);
+    public Employee update(@RequestHeader("Authorization") String authorization, @PathVariable UUID id, @RequestBody Employee employee) {
+        return employeeService.update(id, employee, authorization);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable UUID id) {
-        employeeService.delete(id);
+    public void delete(@PathVariable UUID id, @RequestHeader("Authorization") String authorization) {
+        employeeService.delete(id, authorization);
     }
 
     @PatchMapping("/{id}/lock")

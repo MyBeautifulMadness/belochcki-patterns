@@ -29,18 +29,18 @@ public class ClientController {
     }
 
     @PostMapping
-    public Client create(@RequestBody CreateClientDto client) {
-        return clientService.create(client);
+    public Client create(@RequestHeader("Authorization") String authorization, @RequestBody CreateClientDto client) {
+        return clientService.create(client, authorization);
     }
 
     @PutMapping("/{id}")
-    public Client update(@PathVariable UUID id, @RequestBody Client client) {
-        return clientService.update(id, client);
+    public Client update(@RequestHeader("Authorization") String authorization, @PathVariable UUID id, @RequestBody Client client) {
+        return clientService.update(id, client, authorization);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable UUID id) {
-        clientService.delete(id);
+    public void delete(@RequestHeader("Authorization") String authorization, @PathVariable UUID id) {
+        clientService.delete(id, authorization);
     }
 
     @PatchMapping("/{id}/lock")

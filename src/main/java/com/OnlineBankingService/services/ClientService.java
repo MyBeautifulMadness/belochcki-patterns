@@ -29,7 +29,8 @@ public class ClientService {
                 .orElseThrow(() -> new RuntimeException("Client not found"));
     }
 
-    public Client create(CreateClientDto dto) {
+    public Client create(CreateClientDto dto, String token) {
+        authService.validateEmployeeByToken(token);
         Client client = new Client();
         client.id = UUID.randomUUID();
         client.name = dto.name;
@@ -39,7 +40,8 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
-    public Client update(UUID id, Client updated) {
+    public Client update(UUID id, Client updated, String token) {
+        authService.validateTokenForClient(token, id);
         Client client = findById(id);
         client.login = updated.login;
         client.password = updated.password;
@@ -47,7 +49,8 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
-    public void delete(UUID id) {
+    public void delete(UUID id, String token) {
+        authService.validateEmployeeByToken(token);
         clientRepository.deleteById(id);
     }
 
