@@ -1,0 +1,100 @@
+.unlocker-form {
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+    width: 70%;
+    min-width: 300px;
+    max-width: 1100px;
+    margin: 50px auto;
+    background: transparent;
+}
+
+.unlocker-form h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Табы */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    background: #e0e0e0;
+}
+
+.tabs button.active {
+    background-color: #1C560A;
+    color: #fff;
+}
+
+.tabs .logout {
+    background: #8B0000;
+    color: white;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+}
+
+thead {
+    background-color: #1C560A;
+    color: white;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid rgba(0,0,0,0.1);
+    text-align: center;
+    background: transparent;
+}
+
+/* Кнопки действий в таблице */
+table button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    background-color: #1C560A;
+    color: #fff;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #1C560A;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.hidden {
+    display: none;
+}
+
+/* Header */
+#logo {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.return {
+    text-decoration: none;
+    color: #1C560A;
+    font-weight: bold;
+}

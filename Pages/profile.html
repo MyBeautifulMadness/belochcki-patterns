@@ -1,0 +1,60 @@
+<!DOCTYPE html> 
+<html lang="ru"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Профиль</title> 
+    <link rel="stylesheet" type="text/css" href="../Styles/profile.css"/>
+    <link rel="stylesheet" type="text/css" href="../Styles/general.css"/>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"> 
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script> 
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script> 
+</head> 
+<body> 
+    <header> 
+        <div class="log">
+            <img src="../sorces/logo.png" id="logoimg">
+            <a href="../pages/main.html"class="return">Главная</a>
+        </div> 
+        <span type="submit"  id="in">Вход</span>
+        <div id="userMenu" style="display: none">
+            <button id="profileButton">Личный кабинет</button>
+            <button id="logoutButton">Выход</button>
+        </div>
+    </header>
+    <main> 
+        <div class="profile-form">
+            <div class="field" >
+                <label for="username">Username</label> 
+                <input type="text" id="username" placeholder="KERRIGAN"> 
+            </div>
+            <div class="field" >
+                <label for="birthdate">Дата рождения</label> 
+                <input type="text" id="birthdate" placeholder="12.07.2017"> 
+            </div>
+            <div class="field" >
+                <label for="email">Email</label> 
+                <input type="email" id="email" placeholder="Shupep@kreosoft.ru">
+            </div> 
+            <div class="field" >
+                <label for="firstName">Имя</label> 
+                <input type="text" id="firstName" placeholder="Иван"> 
+            </div>
+            <div class="field" >
+                <label for="lastName">Фамилия</label> 
+                <input type="text" id="lastName" placeholder="Иванов"> 
+            </div>
+            <div class="field" >
+                <label for="phone">Номер телефона</label> 
+                <input type="tel" id="phone" placeholder="+7 (800) 555-35-35"> 
+            </div>
+            <button type="submit" id="save">Сохранить</button> 
+        </div> 
+    </main> 
+ 
+    <footer> 
+        <div class="foot-text">© 2026 - Belochka</div>
+    </footer> 
+    <script type="text/javascript" src="../Scripts/profile.js"></script>
+</body> 
+</html>

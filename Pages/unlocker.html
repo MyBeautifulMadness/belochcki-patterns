@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Unlocker Panel</title>
+  <link rel="stylesheet" href="../Styles/unlocker.css" />
+  <link rel="stylesheet" href="../Styles/general.css" />
+</head>
+<body>
+  <header>
+    <div id="logo">
+      <img src="../sorces/logo.png" id="logoimg">
+      <a href="../Pages/main.html" class="return">Главная</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="unlocker-form">
+      <h2>Разблокировка пользователей</h2>
+
+      <div class="tabs">
+        <button id="clientsTab" class="active">Клиенты</button>
+        <button id="employeesTab">Сотрудники</button>
+        <button id="logoutBtn" class="logout">Выход</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Имя</th>
+            <th>Логин</th>
+            <th>ID</th>
+            <th>Статус</th>
+            <th>Действие</th>
+          </tr>
+        </thead>
+        <tbody id="usersTable"></tbody>
+      </table>
+
+      <div id="toast" class="toast hidden"></div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="foot-text">© 2026 - Belochka</div> 
+  </footer>
+
+  <script src="../Scripts/unlocker.js"></script>
+</body>
+</html>
