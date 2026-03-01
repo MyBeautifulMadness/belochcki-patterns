@@ -269,19 +269,20 @@ public class ClientCreditServiceImpl implements ClientCreditService {
 
         Map<String, Object> withdrawBody = Map.of("amount", request.getAmount(), "comment", "Погашение кредита " + request.getCreditId());
 
-        ResponseEntity<Void> withdrawResponse  = restTemplateConfig.restTemplate().postForEntity("http://localhost:8081/api/core/debit-accounts/" + request.getDebitAccountId() + "/withdraw", withdrawBody, Void.class);
+        ResponseEntity<Void> withdrawResponse  = restTemplateConfig.restTemplate().postForEntity("http://localhost:8081/api/core/clients/" + request.getClientId() + "/debit-accounts/" + request.getDebitAccountId() + "/withdraw", withdrawBody, Void.class);
 
         if (!withdrawResponse.getStatusCode().is2xxSuccessful()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка списания средств с дебетого счета");
         }
 
         BigDecimal newDebt = credit.getDebtAmount().subtract(request.getAmount());
-
         credit.setLastPaymentDate(LocalDate.now());
+        boolean creditJustClosed = false;
 
         if (newDebt.compareTo(BigDecimal.ZERO) <= 0 ){
             credit.setDebtAmount(BigDecimal.ZERO);
             credit.setCreditStatus(CreditStatus.CLOSED);
+            creditJustClosed = true;
 
             CreditOperationHistory closingHistory = CreditOperationHistory.builder()
                     .clientCreditId(credit)
@@ -310,5 +311,20 @@ public class ClientCreditServiceImpl implements ClientCreditService {
                 .build();
 
         creditOperationHistoryRepository.save(history);
+
+        if (creditJustClosed) {
+            boolean hasOpenCredits = clientCreditRepository.existsByClientIdAndCreditStatus(request.getClientId(), CreditStatus.OPEN);
+
+            if (!hasOpenCredits) {
+                ResponseEntity<Void> closeCreditAccountResponse = restTemplateConfig.restTemplate()
+                        .postForEntity(
+                                "http://localhost:8081/api/core/" + request.getClientId() + "/close",
+                                null,
+                                Void.class
+                        );
+            }
+        }
+
     }
+
 }

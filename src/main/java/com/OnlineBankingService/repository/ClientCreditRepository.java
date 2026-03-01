@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface ClientCreditRepository extends JpaRepository<ClientCredit, UUID>, JpaSpecificationExecutor<ClientCredit> {
     List<ClientCredit> findByClientId(UUID clientId);
     List<ClientCredit> findAllByCreditStatus(CreditStatus creditStatus);
+    boolean existsByClientIdAndCreditStatus(UUID clientId, CreditStatus creditStatus);
 }
