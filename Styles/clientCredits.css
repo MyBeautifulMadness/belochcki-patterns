@@ -44,7 +44,6 @@
 
 /* Фильтры */
 .filters {
-  background: rgb(70, 103, 104);
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 20px;
@@ -299,4 +298,8 @@
 
 .status.OVERDUE {
   background: red;
+}
+
+#clientId{
+  display: none;
 }

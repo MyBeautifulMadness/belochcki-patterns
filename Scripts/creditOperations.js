@@ -171,6 +171,7 @@ function creditrepay(){
   }) 
   .catch(error => { 
     console.error('Ошибка списания с кредитного счета:', error); 
-    alert('Ошибка списания с кредитного счета: ' + error);
+    href="../Pages/clientcredits.html"
+    //alert('Ошибка списания с кредитного счета: ' + error);
   }); 
 }
