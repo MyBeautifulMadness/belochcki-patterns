@@ -1,5 +1,7 @@
 const CreditAccountContainer = document.getElementById('CreditAccount-container'); 
 const CreditAccountTemplate = document.getElementById('CreditAccount-template');
+const OperstionsContainer = document.getElementById('Operstions-container'); 
+const OperstionsTemplate = document.getElementById('Operstions-template');
 
 const loginButton = document.getElementById('in');
 const profileButton = document.getElementById('profileButton');
@@ -49,18 +51,31 @@ function activate(){
   }
 }
 
-window.addEventListener('load', () => {
-    const authToken = localStorage.getItem('token');
-    if (authToken) {
-      console.log('Токен получен из localStorage:', localStorage.getItem('token'));
-      email=localStorage.getItem('email')
-      document.getElementById('in').textContent=email;
-      activate(email);
-      loadCreditAccount()
+window.addEventListener('load', async() => {
+  const token = localStorage.getItem('token');
+  
+  if (!token) window.location.href = '../pages/login.html';
+  try {
+    const res = await fetch(`${API_BASE}/auth/validate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token })
+    });
+    if (res.ok) {
+      console.log('Токен валиден');
+      
+      activate();
+      loadCreditAccount() 
+      loadOperstions()
     } else {
-      console.log('Токен не найден в localStorage.');
-      //window.location.href = '../pages/login.html'
+      console.log('Токен невалиден');
+      localStorage.clear();
     }
+  } catch (e) {
+    console.error('Ошибка при проверке токена', e);
+    localStorage.clear();
+    alert('1');
+  }
 });
 
 function formatDate(dateString) { 
@@ -109,5 +124,73 @@ function loadCreditAccount() {
   .catch(error => { 
     console.error('Ошибка получения информации о кредитном счёте:', error); 
     alert('Ошибка получения информации о кредитном счёте: ' + error);
+  }); 
+}
+
+
+function loadOperstions() {
+  OperstionsContainer.innerHTML = '';  
+  fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/accounts/${localStorage.getItem('selectedAccount')}/operations?accountType=CREDIT&page=0&size=120&sort=ASC`, { 
+    method: 'GET', 
+    headers: { 
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json' 
+    },      
+  })
+  .then(response => { 
+    if (!response.ok) {
+      return response.text().then(text => { throw new Error(text) }); 
+    } 
+    return response.json();
+  }) 
+  .then(data => {
+    console.log(data);
+    const content = data.content;
+    content.forEach(Operstion => {
+      const OperstionsBlock = OperstionsTemplate.content.cloneNode(true);
+      OperstionsBlock.querySelector('.comment').textContent =  `Результат: ${Operstion.comment}`;
+      OperstionsBlock.querySelector('.operationType').textContent =  `Тип операции: ${Operstion.operationType}`;
+      OperstionsBlock.querySelector('.time').textContent =  `Время операции: ${Operstion.time}`;
+      OperstionsBlock.querySelector('.amount').textContent = `Сумма перевода: ${Operstion.amount} ₽.`;
+      OperstionsBlock.querySelector('.date').textContent =  `Дата операции: ${formatDate(Operstion.date)}.`;
+      if(Operstion.operationType == 'OPEN' || Operstion.operationType == 'CLOSE'){
+        OperstionsBlock.querySelector('.amount').style.display = 'none';
+      }
+      OperstionsContainer.appendChild(OperstionsBlock);  
+    })   
+  })
+  .catch(error => { 
+    console.error('Ошибка получения списка операций дебетового счета:', error); 
+    alert('Ошибка получения списка операций дебетового счета: ' + error);
+  }); 
+}
+
+function withdraw(){
+  if (document.getElementById('amount').value === '') { 
+    alert('Пожалуйста, укажите сумму операции!'); 
+    return; 
+  } 
+  fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/credit-accounts/${localStorage.getItem('selectedAccount')}/withdraw`, { 
+    method: 'POST', 
+    headers: { 
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json' 
+    },      
+    body: JSON.stringify({
+      amount: document.getElementById('amount').value,
+      comment: "Мы отберём у вас все деньги"
+    })
+  })
+  .then(response => { 
+    if (!response.ok) {
+      return response.text().then(text => { throw new Error(text) }); 
+    } 
+    loadCreditAccount() 
+    loadOperstions();
+    return response.json();
+  }) 
+  .catch(error => { 
+    console.error('Ошибка списания с кредитного счета:', error); 
+    alert('Ошибка списания с кредитного счета: ' + error);
   }); 
 }

@@ -22,7 +22,7 @@
   </header>
   <main>
     <div class="block-column">
-      <div class="info-text">Ваш кредитный счёт.</div> 
+      <div class="info-text">Это ваш кредитный счёт.</div> 
       <div id="CreditAccount-container">
         <template id="CreditAccount-template">
           <div class="CreditAccount-block">
@@ -30,9 +30,31 @@
             <div class="balance"></div>
             <div class="status"></div>
             <div class="createdDate"></div>
-            </div>
+          </div>
         </template>
       </div>
+      
+      <div id="Money-container">
+        <div class="info-text">Вы можете:</div> 
+        <div class="block-row">
+          <button id="openAccountButton" onclick=withdraw()>Снять с него деньги</button>
+          <div class="info-text"> На сумму</div> 
+          <input type="amount" id="amount" placeholder="1000"> 
+          <div class="info-text">₽.</div> 
+        </div>
+          <div class="info-text">Операции этого счёта:</div> 
+        </div>
+        <div id="Operstions-container">
+          <template id="Operstions-template">
+            <div class="Operstions-block">
+              <div class="date"></div>
+              <div class="time"></div>
+              <div class="amount"></div>
+              <div class="operationType"></div>
+              <div class="comment"></div>
+            </div>
+          </template>
+        </div>
     </div> 
   </main>
   <footer>

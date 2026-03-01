@@ -21,10 +21,14 @@
   margin-bottom: 15px;
   padding: 5px;
   border-radius: 5px;
+  color: gold;
+  text-shadow: 1px 2px 2px 4px #000000;;
+  border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
-  color: red;
 }
 
+#Money-container,
+#Operstions-container,
 #CreditAccount-container {
   margin: 0 auto;
   margin-bottom: 20px;
@@ -34,23 +38,51 @@
   width: 75%;
 }
 
-.CreditAccount-block{
-  padding: 0;
-  color: white;
+.CreditAccount-block,
+.Operstions-block{
+  color: gold;
+  text-shadow: 1px 2px 2px 6px #000000;;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
   padding: 15px;
-  
-  cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.5;
   display: flex;
   flex-direction: column;
-} 
+}
 
 .CreditAccount-block .name,
 .CreditAccount-block .balance,
 .CreditAccount-block .status,
-.CreditAccount-block .createdDate{  
+.CreditAccount-block .createdDate,
+.Operstions-block .date,
+.Operstions-block .time,
+.Operstions-block .amount,
+.Operstions-block .comment,
+.Operstions-block .operationType{  
   margin: 5px 15px;
+}
+
+ button {
+  margin-bottom: 15px;
+  font-size: 20px;
+  background: none; 
+  color: rgb(9, 53, 9);
+  text-shadow: 1px 2px 2px 6px #000000;;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+  padding: 5px;
+  cursor: pointer;
+}
+
+input { 
+  margin-bottom: 15px;
+  font-size: 20px;
+  background: none; 
+  color: black;
+  text-shadow: 1px 2px 2px 6px #000000;;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+  padding: 5px;
+  cursor: pointer;
 }

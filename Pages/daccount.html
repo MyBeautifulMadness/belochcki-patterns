@@ -34,13 +34,18 @@
           </div>
         </template>
       </div>
-      <div class="info-text">Вы можете:</div> 
-      <div class="block-row">
-        <button id="openAccountButton" onclick=deposit()>Пополнить счёт</button>
-        <div class="info-text">и</div> 
-        <button id="openAccountButton" onclick=withdraw()>Снять с него деньги</button>
+      <div id="Money-container">
+        <div class="info-text">Вы можете:</div> 
+        <div class="block-row">
+          <button id="openAccountButton" onclick=deposit()>Пополнить счёт</button>
+          <div class="info-text">и</div> 
+          <button id="openAccountButton" onclick=withdraw()>Снять с него деньги</button>
+          <div class="info-text"> На сумму</div> 
+          <input type="amount" id="amount" placeholder="1000"> 
+          <div class="info-text">₽.</div> 
+        </div>
+        <div class="info-text">Операции этого счёта:</div> 
       </div>
-      <div class="info-text">Операции этого счёта:</div> 
       <div id="Operstions-container">
         <template id="Operstions-template">
           <div class="Operstions-block">

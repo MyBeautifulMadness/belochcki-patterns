@@ -113,7 +113,6 @@ function loadDebitAccount() {
       DebitAccountBlock.querySelector('.status').textContent =  `Этот счет открыт.`;
     }else{
       DebitAccountBlock.querySelector('.status').textContent =  `Этот счет закрыт.`;
-      DebitAccountBlock.querySelector('.deleteDebitAccount').style.display = 'none';
     }
     DebitAccountContainer.appendChild(DebitAccountBlock);     
   })
@@ -125,7 +124,7 @@ function loadDebitAccount() {
 
 function loadOperstions() {
   OperstionsContainer.innerHTML = '';  
-  fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/accounts/${localStorage.getItem('selectedAccount')}/operations?accountType=DEBIT&page=0&size=1&sort=ASC`, { 
+  fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/accounts/${localStorage.getItem('selectedAccount')}/operations?accountType=DEBIT&page=0&size=120&sort=ASC`, { 
     method: 'GET', 
     headers: { 
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -157,5 +156,65 @@ function loadOperstions() {
   .catch(error => { 
     console.error('Ошибка получения списка операций дебетового счета:', error); 
     alert('Ошибка получения списка операций дебетового счета: ' + error);
+  }); 
+}
+
+function deposit(){
+  if (document.getElementById('amount').value === '') { 
+    alert('Пожалуйста, укажите сумму операции!'); 
+    return; 
+  } 
+  fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/debit-accounts/${localStorage.getItem('selectedAccount')}/deposit`, { 
+    method: 'POST', 
+    headers: { 
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json' 
+    },      
+    body: JSON.stringify({
+      amount: document.getElementById('amount').value,
+      comment: "Sibidi dob dob yes yes"
+    })
+  })
+  .then(response => { 
+    if (!response.ok) {
+      return response.text().then(text => { throw new Error(text) }); 
+    } 
+    loadDebitAccount() 
+    loadOperstions();
+    return response.json();
+  }) 
+  .catch(error => { 
+    console.error('Ошибка пополения дебетового счета:', error); 
+    alert('Ошибка пополнения дебетового счета: ' + error);
+  }); 
+}
+
+function withdraw(){
+  if (document.getElementById('amount').value === '') { 
+    alert('Пожалуйста, укажите сумму операции!'); 
+    return; 
+  } 
+  fetch(`${API_BASE}/gateway/accounts/clients/${ClientID}/debit-accounts/${localStorage.getItem('selectedAccount')}/withdraw`, { 
+    method: 'POST', 
+    headers: { 
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json' 
+    },      
+    body: JSON.stringify({
+      amount: document.getElementById('amount').value,
+      comment: "Sibidi dob dob no no"
+    })
+  })
+  .then(response => { 
+    if (!response.ok) {
+      return response.text().then(text => { throw new Error(text) }); 
+    } 
+    loadDebitAccount() 
+    loadOperstions();
+    return response.json();
+  }) 
+  .catch(error => { 
+    console.error('Ошибка списания с дебетового счета:', error); 
+    alert('Ошибка списания с дебетового счета: ' + error);
   }); 
 }
