@@ -1,0 +1,85 @@
+.block-row{
+  align-items: center; 
+  display: flex; 
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  justify-content: space-around;
+}
+
+#in, .return{
+  border: 1px solid rgb(42, 82, 83);
+  padding: 5px;
+  border-radius: 8px;
+  background-color: rgb(70, 103, 104);
+  color: rgb(255, 255, 255);
+}
+
+.block-column{
+  display: flex; 
+  align-items: center; 
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  
+}
+
+.info-text{
+  margin-bottom: 15px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgb(70, 103, 104);
+  border: 1px solid black;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  color: azure;
+  font-weight: 700;
+  font-size: 28px;
+}
+
+#DebitAccount-container,
+#CreditAccount-container {
+  margin: 0 auto 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 75%;
+}
+
+.DebitAccount-block,
+.CreditAccount-block{
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid black;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  color: #555;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.DebitAccount-block .name,
+.DebitAccount-block .balance,
+.DebitAccount-block .status,
+.DebitAccount-block .createdDate,
+.CreditAccount-block .name,
+.CreditAccount-block .balance,
+.CreditAccount-block .status,
+.CreditAccount-block .createdDate{
+  margin: 6px 0;
+}
+
+.DebitAccount-blocks .type,
+.DebitAccount-blocks .description,
+.DebitAccount-blocks .startDate,
+.DebitAccount-blocks .endDate,
+.CreditAccount-blocks .type,
+.CreditAccount-blocks .description,
+.CreditAccount-blocks .startDate,
+.CreditAccount-blocks .endDate{  
+  margin: 5px 15px;
+}

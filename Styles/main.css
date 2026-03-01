@@ -6,6 +6,14 @@
   height: 100%;
 }
 
+#in, .return{
+  border: 1px solid rgb(42, 82, 83);
+  padding: 5px;
+  border-radius: 8px;
+  background-color: rgb(70, 103, 104);
+  color: rgb(255, 255, 255);
+}
+
 .block-column{
   display: flex; 
   align-items: center; 
@@ -38,7 +46,7 @@
 #about_us{
   width: 70%;
   margin: 2%;
-  background-color: black;
+  background-color: rgb(70, 103, 104);
   cursor: pointer;
   border-radius: 15px;
   text-decoration: none;
@@ -50,11 +58,13 @@
 #info_img{
   max-width: 50px;
   max-height: 50px;
+  color: white;
+  margin-right: 8px;
 }
 
 .info_title{
   color: white;
-  font-size: 16px;
+  font-size: 22px;
   margin-bottom: 10px;
 }
 

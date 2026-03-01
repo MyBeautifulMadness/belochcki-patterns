@@ -4,6 +4,7 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
     width: 30%;
     min-width: 300px;
+    background: rgb(70, 103, 104);
 }
 
 .login-form h2 {
@@ -24,18 +25,19 @@
     border: 1px solid #ccc;
     border-radius: 3px;
     box-sizing: border-box;
+    border-radius: 8px;
 }
 
 .login-form button {
     width: 100%;
     padding: 10px;
     border: none;
-    border-radius: 3px;
+    border-radius: 8px;
     cursor: pointer;
     margin-bottom: 10px;
 }
 
 .login-form button[type="submit"] {
-    background-color: #1C560A; 
+    background-color: rgb(151, 42, 42);
     color: #fff;
 }

@@ -9,13 +9,16 @@
 </head>
 <body>
 <header>
-  <div class="log">
-    <img src="../sorces/logo.png" id="logoimg">
-    <a href="../Pages/main.html" class="return">Главная</a>
+    <div class="log">
+      <img src="../sorces/logo.png" id="logoimg">
+      <a href="../Pages/main.html" class="return">Главная</a>
+    </div>
+    <span type="submit"  id="in">Вход</span>
+    <div id="userMenu" style="display: none">
+      <button id="profileButton">Личный кабинет</button>
+      <button id="logoutButton">Выход</button>
   </div>
-
-  <span id="logoutBtn">Выход</span>
-</header>
+  </header>
 
 <main class="admin-page">
 
@@ -25,7 +28,7 @@
   </div>
 
   <div class="actions">
-    <button id="createBtn", onclick="openCreateModal()">➕ Создать</button>
+    <button id="createBtn", onclick="openCreateModal()">＋ Создать</button>
   </div>
 
   <table class="users-table">

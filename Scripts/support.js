@@ -7,9 +7,10 @@ let userMenuListenerAttached = false;
 function activate(email){
   if (!userMenuListenerAttached) {
     loginButton.addEventListener('click', () => {
-    userMenu.style.display = userMenu.style.display === 'block' ? 'none' : 'block';
+    window.location.href = '../pages/login.html'
     });
-    loginButton.textContent = email + ' ▾';
+    loginButton.textContent = 'Выход';
+    loginButton.style.color = "rgb(255, 255, 255)"
     profileButton.style.display = 'inline-block';
     logoutButton.style.display = 'inline-block';
 
@@ -42,7 +43,7 @@ window.addEventListener('load', () => {
       document.getElementById('in').textContent=email;
       activate(email);
     } else {
-      console.log('Токен не найден в localStorage.');
-      //window.location.href = '../pages/login.html'
+      alert("Необходимо войти в аккаунт");
+      window.location.href = '../pages/login.html'
     }
 });
