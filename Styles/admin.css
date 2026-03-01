@@ -1,0 +1,174 @@
+/* Контейнер страницы */
+.admin-page {
+    width: 100%;
+    padding: 30px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Вкладки */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: black;
+    font-size: 16px;
+}
+
+.tabs button.active {
+    background-color: #1C560A;
+    color: white;
+}
+
+/* Кнопка создать */
+.actions {
+    width: 80%;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.actions button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    background-color: #1C560A;
+    color: white;
+}
+
+/* Таблица */
+.users-table {
+    width: 80%;
+    min-width: 300px;
+    border-collapse: collapse;
+    background-color: rgba(0, 0, 0, 0.55);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+}
+
+.users-table th,
+.users-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: left;
+}
+
+.users-table th {
+    font-weight: bold;
+}
+
+.users-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Кнопки действий */
+.users-table button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.users-table button:nth-child(1) {
+    background-color: #1C560A;
+    color: white;
+}
+
+.users-table button:nth-child(2) {
+    background-color: #8B0000;
+    color: white;
+}
+
+.users-table button:nth-child(3) {
+    background-color: #444;
+    color: white;
+}
+
+/* Модалка */
+.modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+    width: 30%;
+    min-width: 300px;
+    background-color: rgba(0, 0, 0, 0.85);
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+/* Кнопки модалки */
+.modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.modal-actions button:first-child {
+    background-color: #1C560A;
+    color: white;
+}
+
+.modal-actions button:last-child {
+    background-color: #555;
+    color: white;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 12px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+    font-size: 16px;
+}
+
+.toast.hidden {
+    display: none;
+}

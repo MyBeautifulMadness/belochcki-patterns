@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../Styles/admin.css">
+  <link rel="stylesheet" href="../Styles/general.css">
+  <title>Админка</title>
+</head>
+<body>
+<header>
+  <div class="log">
+    <img src="../sorces/logo.png" id="logoimg">
+    <a href="../Pages/main.html" class="return">Главная</a>
+  </div>
+
+  <span id="logoutBtn">Выход</span>
+</header>
+
+<main class="admin-page">
+
+  <div class="tabs">
+    <button id="clientsTab" class="active">Клиенты</button>
+    <button id="employeesTab">Сотрудники</button>
+  </div>
+
+  <div class="actions">
+    <button id="createBtn", onclick="openCreateModal()">➕ Создать</button>
+  </div>
+
+  <table class="users-table">
+    <thead>
+      <tr>
+        <th>Имя</th>
+        <th>Логин</th>
+        <th>ID</th>
+        <th>Статус</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody id="usersTable"></tbody>
+  </table>
+
+  <div id="userModal" class="modal hidden">
+  <div class="modal-content">
+    <h3 id="modalTitle">Создать</h3>
+
+    <input id="userId" placeholder="ID" disabled>
+    <input id="userName" placeholder="Имя">
+    <input id="userLogin" placeholder="Логин">
+    <input id="userPassword" placeholder="Пароль" type="password">
+    <input id="userStatus" placeholder="Статус">
+    <input id="userToken" placeholder="Token">
+
+    <div class="modal-actions">
+      <button onclick="saveUser()">Сохранить</button>
+      <button onclick="closeModal()">Отмена</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+</main>
+
+<footer>
+  <div class="foot-text">© 2026 - Belochka</div>
+</footer>
+
+<script src="../Scripts/admin.js"></script>
+</body>
+</html>
