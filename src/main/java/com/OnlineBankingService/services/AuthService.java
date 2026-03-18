@@ -35,7 +35,7 @@ public class AuthService {
             String token = jwtService.generateToken(employee.id, employee.login, "EMPLOYEE");
             employee.token = token;
 
-            userFeignClient.updateEmployee(employee.id, employee);
+            //userFeignClient.updateEmployee(employee.id, employee);
 
             AuthResponseDto responseDto = new AuthResponseDto();
             responseDto.setToken(token);
@@ -56,12 +56,12 @@ public class AuthService {
             String token = jwtService.generateToken(client.id, client.login, "CLIENT");
             client.token = token;
 
-            userFeignClient.updateClient(client.id, client);
+            //userFeignClient.updateClient(client.id, client);
 
             AuthResponseDto responseDto = new AuthResponseDto();
             responseDto.setToken(token);
             responseDto.setUserId(client.id);
-            responseDto.setUserType("EMPLOYEE");
+            responseDto.setUserType("CLIENT");
 
             return responseDto;
         }
