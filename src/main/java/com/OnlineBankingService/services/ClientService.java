@@ -1,6 +1,8 @@
 package com.OnlineBankingService.services;
 
+import com.OnlineBankingService.configs.AuthClient;
 import com.OnlineBankingService.dtos.CreateClientDto;
+import com.OnlineBankingService.dtos.TokenRequestDto;
 import com.OnlineBankingService.entities.Client;
 import com.OnlineBankingService.entities.Status;
 import com.OnlineBankingService.repositories.ClientRepository;
@@ -13,11 +15,12 @@ import java.util.UUID;
 public class ClientService {
 
     private final ClientRepository clientRepository;
-    private final AuthService authService;
+    private final AuthClient authClient;
 
-    public ClientService(ClientRepository clientRepository, AuthService authService) {
+    public ClientService(ClientRepository clientRepository,
+                         AuthClient authClient) {
         this.clientRepository = clientRepository;
-        this.authService = authService;
+        this.authClient = authClient;
     }
 
     public List<Client> findAll() {
@@ -29,43 +32,79 @@ public class ClientService {
                 .orElseThrow(() -> new RuntimeException("Client not found"));
     }
 
+    public Client findByLogin(String login) {
+        return clientRepository.findByLogin(login)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+    }
+
+    public Client findByToken(String token) {
+        return clientRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+    }
+
     public Client create(CreateClientDto dto, String token) {
-        authService.validateEmployeeByToken(token);
+
+        TokenRequestDto request = new TokenRequestDto();
+        request.token = token;
+
+        authClient.validateEmployee(request);
+
         Client client = new Client();
         client.id = UUID.randomUUID();
         client.name = dto.name;
         client.login = dto.login;
         client.password = dto.password;
         client.status = Status.UNLOCKED;
+
         return clientRepository.save(client);
     }
 
     public Client update(UUID id, Client updated, String token) {
-        authService.validateClientOrEmployee(token, id);
+
+        authClient.validateClientOrEmployee(token, id);
+
         Client client = findById(id);
         client.login = updated.login;
         client.name = updated.name;
         client.password = updated.password;
         client.status = updated.status;
+
         return clientRepository.save(client);
     }
 
     public void delete(UUID id, String token) {
-        authService.validateEmployeeByToken(token);
+
+        TokenRequestDto request = new TokenRequestDto();
+        request.token = token;
+
+        authClient.validateEmployee(request);
+
         clientRepository.deleteById(id);
     }
 
     public Client lock(UUID id, String token) {
-        authService.validateEmployeeByToken(token);
+
+        TokenRequestDto request = new TokenRequestDto();
+        request.token = token;
+
+        authClient.validateEmployee(request);
+
         Client client = findById(id);
         client.status = Status.LOCKED;
+
         return clientRepository.save(client);
     }
 
     public Client unlock(UUID id, String token) {
-        authService.validateEmployeeByToken(token);
+
+        TokenRequestDto request = new TokenRequestDto();
+        request.token = token;
+
+        authClient.validateEmployee(request);
+
         Client client = findById(id);
         client.status = Status.UNLOCKED;
+
         return clientRepository.save(client);
     }
 }

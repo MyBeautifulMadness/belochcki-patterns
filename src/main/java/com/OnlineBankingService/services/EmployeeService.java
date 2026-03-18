@@ -1,6 +1,8 @@
 package com.OnlineBankingService.services;
 
+import com.OnlineBankingService.configs.AuthClient;
 import com.OnlineBankingService.dtos.CreateEmployeeDto;
+import com.OnlineBankingService.dtos.TokenRequestDto;
 import com.OnlineBankingService.entities.Employee;
 import com.OnlineBankingService.entities.Status;
 import com.OnlineBankingService.repositories.EmployeeRepository;
@@ -13,11 +15,12 @@ import java.util.UUID;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
-    private final AuthService authService;
+    private final AuthClient authClient;
 
-    public EmployeeService(EmployeeRepository employeeRepository, AuthService authService) {
+    public EmployeeService(EmployeeRepository employeeRepository,
+                           AuthClient authFeignClient) {
         this.employeeRepository = employeeRepository;
-        this.authService = authService;
+        this.authClient = authFeignClient;
     }
 
     public List<Employee> findAll() {
@@ -29,14 +32,30 @@ public class EmployeeService {
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
     }
 
+    public Employee findByLogin(String login) {
+        return employeeRepository.findByLogin(login)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+    }
+
+    public Employee findByToken(String token) {
+        return employeeRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+    }
+
     public Employee create(CreateEmployeeDto dto, String token) {
-        authService.validateEmployeeByToken(token);
+
+        TokenRequestDto request = new TokenRequestDto();
+        request.token = token;
+
+        authClient.validateEmployee(request);
+
         Employee employee = new Employee();
         employee.id = UUID.randomUUID();
         employee.name = dto.name;
         employee.login = dto.login;
         employee.password = dto.password;
         employee.status = Status.UNLOCKED;
+
         return employeeRepository.save(employee);
     }
 
@@ -51,31 +70,54 @@ public class EmployeeService {
     }
 
     public Employee update(UUID id, Employee updated, String token) {
-        authService.validateEmployeeByToken(token);
+
+        TokenRequestDto request = new TokenRequestDto();
+        request.token = token;
+
+        authClient.validateEmployee(request);
+
         Employee employee = findById(id);
         employee.login = updated.login;
         employee.name = updated.name;
         employee.password = updated.password;
         employee.status = updated.status;
+
         return employeeRepository.save(employee);
     }
 
     public void delete(UUID id, String token) {
-        authService.validateEmployeeByToken(token);
+
+        TokenRequestDto request = new TokenRequestDto();
+        request.token = token;
+
+        authClient.validateEmployee(request);
+
         employeeRepository.deleteById(id);
     }
 
     public Employee lock(UUID id, String token) {
-        authService.validateEmployeeByToken(token);
+
+        TokenRequestDto request = new TokenRequestDto();
+        request.token = token;
+
+        authClient.validateEmployee(request);
+
         Employee employee = findById(id);
         employee.status = Status.LOCKED;
+
         return employeeRepository.save(employee);
     }
 
     public Employee unlock(UUID id, String token) {
-        authService.validateEmployeeByToken(token);
+
+        TokenRequestDto request = new TokenRequestDto();
+        request.token = token;
+
+        authClient.validateEmployee(request);
+
         Employee employee = findById(id);
         employee.status = Status.UNLOCKED;
+
         return employeeRepository.save(employee);
     }
 }
