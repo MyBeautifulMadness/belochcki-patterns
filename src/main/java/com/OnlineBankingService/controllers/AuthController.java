@@ -1,44 +1,44 @@
 package com.OnlineBankingService.controllers;
 
+import com.OnlineBankingService.configs.AuthClient;
 import com.OnlineBankingService.dtos.AuthRequestDto;
 import com.OnlineBankingService.dtos.AuthResponseDto;
 import com.OnlineBankingService.dtos.TokenClientRequestDto;
 import com.OnlineBankingService.dtos.TokenRequestDto;
-import com.OnlineBankingService.services.AuthService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthClient authClient;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
+    public AuthController(AuthClient authClient) {
+        this.authClient = authClient;
     }
 
     @PostMapping("/login")
     public AuthResponseDto login(@RequestBody AuthRequestDto dto) {
-        return authService.login(dto);
+        return authClient.login(dto);
     }
 
     @PostMapping("/logout")
     public void logout(@RequestBody TokenRequestDto dto) {
-        authService.logout(dto.token);
+        authClient.logout(dto);
     }
 
     @PostMapping("/validate")
-    public void validate(@RequestBody TokenRequestDto dto) {
-        authService.validateToken(dto.token);
+    public boolean validate(@RequestBody TokenRequestDto dto) {
+        return authClient.validate(dto);
     }
 
     @PostMapping("/validate-client")
     public boolean validateClientToken(@RequestBody TokenClientRequestDto dto) {
-        return authService.validateTokenForClient(dto.token, dto.clientId);
+        return authClient.validateClient(dto);
     }
 
     @PostMapping("/validate-employee")
     public boolean validateEmployeeToken(@RequestBody TokenRequestDto token) {
-        return authService.validateEmployeeByToken(token.token);
+        return authClient.validateEmployee(token);
     }
 }
