@@ -1,12 +1,8 @@
 package com.OnlineBankingService.entity;
 
 import com.OnlineBankingService.domain.AccountStatus;
-import com.OnlineBankingService.domain.AccountType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,19 +10,16 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "credit_account")
+@Table(name = "master_account")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreditAccount {
+public class MasterAccount {
 
     @Id
     @GeneratedValue
     private UUID id;
-
-    @Column(name = "client_id", nullable = false)
-    private UUID clientId;
 
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;

@@ -42,3 +42,13 @@ CREATE TABLE account_operation (
 
 CREATE INDEX idx_account_operation_account_id ON account_operation (account_type, account_id);
 CREATE INDEX idx_account_operation_date_time ON account_operation (op_date DESC, op_time DESC);
+
+CREATE TABLE master_account (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_date DATE NOT NULL,
+    created_time TIME NOT NULL,
+    balance NUMERIC(19,2) NOT NULL,
+    name VARCHAR(16) NOT NULL,
+    currency_code VARCHAR(3) NOT NULL REFERENCES currency(code),
+    status VARCHAR(16) NOT NULL
+);

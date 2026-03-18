@@ -11,7 +11,6 @@ import java.util.UUID;
 public record CreditIssuedRequest(
         @NotNull UUID clientId,
         @NotNull @DecimalMin(value = "0.01") BigDecimal amount,
-        @NotBlank @Size(min = 3, max = 3) String currencyCode,
         String comment
 ) {
     public String commentOrDefault(String fallback) {

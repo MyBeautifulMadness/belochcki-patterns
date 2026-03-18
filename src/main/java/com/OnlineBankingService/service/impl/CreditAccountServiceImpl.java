@@ -14,6 +14,7 @@ import com.OnlineBankingService.repository.AccountOperationRepository;
 import com.OnlineBankingService.repository.CreditAccountRepository;
 import com.OnlineBankingService.service.CreditAccountService;
 import com.OnlineBankingService.service.CurrencyService;
+import com.OnlineBankingService.service.MasterAccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ public class CreditAccountServiceImpl implements CreditAccountService {
     private final AccountOperationRepository operationRepository;
     private final AccountNameGenerator nameGenerator;
     private final CurrencyService currencyService;
+    private final MasterAccountService masterAccountService;
 
     @Override
     @Transactional(readOnly = true)
@@ -106,50 +108,80 @@ public class CreditAccountServiceImpl implements CreditAccountService {
     @Transactional
     public CreditAccountResponse onCreditIssued(CreditIssuedRequest request) {
         UUID clientId = request.clientId();
-        BigDecimal amount = normalizeAmount(request.amount());
+        BigDecimal amount = request.amount().setScale(2);
+        String currencyCode = "RUB";
 
-        String currencyCode = request.currencyCode().toUpperCase();
-        currencyService.getActiveCurrencyOrThrow(currencyCode);
+        masterAccountService.withdrawForCredit(amount);
 
-        BigDecimal newBalance = accountRepository.addToBalanceByClientIdOpen(clientId, amount);
+        Optional<CreditAccount> optional = accountRepository.findByClientId(clientId);
 
-        if (newBalance != null) {
-            CreditAccount acc = accountRepository.findByClientId(clientId)
-                    .orElseThrow(() -> new NotFoundException("Credit account not found after top-up for client: " + clientId));
+        if (optional.isEmpty()) {
+            var nowDate = LocalDate.now();
+            var nowTime = LocalTime.now().withNano(0);
 
-            saveOperation(acc.getId(), amount, request.commentOrDefault("Credit issued"), OperationType.DEPOSIT);
-            acc.setBalance(newBalance);
-            return toResponse(acc);
+            CreditAccount created = CreditAccount.builder()
+                    .clientId(clientId)
+                    .createdDate(nowDate)
+                    .createdTime(nowTime)
+                    .balance(amount)
+                    .name(generateUniqueNameForCredit())
+                    .currencyCode(currencyCode)
+                    .status(AccountStatus.OPEN)
+                    .build();
+
+            created = accountRepository.save(created);
+
+            saveOperation(
+                    created.getId(),
+                    amount,
+                    request.commentOrDefault("Credit issued from master account"),
+                    OperationType.TRANSFER_IN
+            );
+
+            return toResponse(created);
         }
 
-        newBalance = accountRepository.openAndAddToBalanceByClientId(clientId, amount);
-        if (newBalance != null) {
-            CreditAccount acc = accountRepository.findByClientId(clientId)
-                    .orElseThrow(() -> new NotFoundException("Credit account not found after reopen for client: " + clientId));
+        CreditAccount account = optional.get();
 
-            saveOperation(acc.getId(), amount, request.commentOrDefault("Credit issued (reopen)"), OperationType.DEPOSIT);
-            acc.setBalance(newBalance);
-            return toResponse(acc);
+        if (!currencyCode.equals(account.getCurrencyCode())) {
+            throw new ConflictException("Credit account currency must be RUB");
         }
 
-        var nowDate = LocalDate.now();
-        var nowTime = LocalTime.now().withNano(0);
+        if (account.getStatus() == AccountStatus.OPEN) {
+            BigDecimal newBalance = accountRepository.addToBalanceByClientIdOpen(clientId, amount);
 
-        CreditAccount created = CreditAccount.builder()
-                .clientId(clientId)
-                .createdDate(nowDate)
-                .createdTime(nowTime)
-                .balance(amount)
-                .name(generateUniqueNameForCredit())
-                .currencyCode(currencyCode)
-                .status(AccountStatus.OPEN)
-                .build();
+            if (newBalance == null) {
+                throw new ConflictException("Failed to add funds to open credit account");
+            }
 
-        created = accountRepository.save(created);
+            saveOperation(
+                    account.getId(),
+                    amount,
+                    request.commentOrDefault("Credit issued from master account"),
+                    OperationType.TRANSFER_IN
+            );
 
-        saveOperation(created.getId(), amount, request.commentOrDefault("Credit issued (create)"), OperationType.DEPOSIT);
+            account.setBalance(newBalance);
+            return toResponse(account);
+        }
 
-        return toResponse(created);
+        BigDecimal newBalance = accountRepository.openAndAddToBalanceByClientId(clientId, amount);
+
+        if (newBalance == null) {
+            throw new ConflictException("Failed to reopen and fund credit account");
+        }
+
+        saveOperation(
+                account.getId(),
+                amount,
+                request.commentOrDefault("Credit issued from master account (reopen)"),
+                OperationType.TRANSFER_IN
+        );
+
+        account.setStatus(AccountStatus.OPEN);
+        account.setBalance(newBalance);
+
+        return toResponse(account);
     }
 
     private String generateUniqueNameForCredit() {
