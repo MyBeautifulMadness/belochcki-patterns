@@ -29,6 +29,7 @@ public class AdminAccountController {
                         a.getCreatedTime(),
                         a.getBalance(),
                         a.getName(),
+                        a.getCurrencyCode(),
                         a.getStatus()
                 ));
     }
@@ -43,6 +44,7 @@ public class AdminAccountController {
                         a.getCreatedTime(),
                         a.getBalance(),
                         a.getName(),
+                        a.getCurrencyCode(),
                         a.getStatus()
                 ));
     }

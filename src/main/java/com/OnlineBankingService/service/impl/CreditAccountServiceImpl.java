@@ -13,6 +13,7 @@ import com.OnlineBankingService.generator.AccountNameGenerator;
 import com.OnlineBankingService.repository.AccountOperationRepository;
 import com.OnlineBankingService.repository.CreditAccountRepository;
 import com.OnlineBankingService.service.CreditAccountService;
+import com.OnlineBankingService.service.CurrencyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,7 @@ public class CreditAccountServiceImpl implements CreditAccountService {
     private final CreditAccountRepository accountRepository;
     private final AccountOperationRepository operationRepository;
     private final AccountNameGenerator nameGenerator;
+    private final CurrencyService currencyService;
 
     @Override
     @Transactional(readOnly = true)
@@ -106,6 +108,9 @@ public class CreditAccountServiceImpl implements CreditAccountService {
         UUID clientId = request.clientId();
         BigDecimal amount = normalizeAmount(request.amount());
 
+        String currencyCode = request.currencyCode().toUpperCase();
+        currencyService.getActiveCurrencyOrThrow(currencyCode);
+
         BigDecimal newBalance = accountRepository.addToBalanceByClientIdOpen(clientId, amount);
 
         if (newBalance != null) {
@@ -136,6 +141,7 @@ public class CreditAccountServiceImpl implements CreditAccountService {
                 .createdTime(nowTime)
                 .balance(amount)
                 .name(generateUniqueNameForCredit())
+                .currencyCode(currencyCode)
                 .status(AccountStatus.OPEN)
                 .build();
 
@@ -200,6 +206,7 @@ public class CreditAccountServiceImpl implements CreditAccountService {
                 a.getCreatedTime(),
                 a.getBalance(),
                 a.getName(),
+                a.getCurrencyCode(),
                 a.getStatus()
         );
     }

@@ -14,6 +14,7 @@ import com.OnlineBankingService.generator.AccountNameGenerator;
 import com.OnlineBankingService.repository.AccountOperationRepository;
 import com.OnlineBankingService.repository.CreditAccountRepository;
 import com.OnlineBankingService.repository.DebitAccountRepository;
+import com.OnlineBankingService.service.CurrencyService;
 import com.OnlineBankingService.service.DebitAccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,12 +36,16 @@ public class DebitAccountServiceImpl implements DebitAccountService {
     private final AccountOperationRepository operationRepository;
     private final CreditAccountRepository creditAccountRepository;
     private final AccountNameGenerator nameGenerator;
+    private final CurrencyService currencyService;
 
     @Override
     @Transactional
-    public DebitAccountResponse open(UUID clientId) {
+    public DebitAccountResponse open(UUID clientId, OpenDebitAccountRequest request) {
         var nowDate = LocalDate.now();
         var nowTime = LocalTime.now().withNano(0);
+
+        String currencyCode = request.currencyCode().toUpperCase();
+        currencyService.getActiveCurrencyOrThrow(currencyCode);
 
         var account = DebitAccount.builder()
                 .clientId(clientId)
@@ -48,6 +53,7 @@ public class DebitAccountServiceImpl implements DebitAccountService {
                 .createdTime(nowTime)
                 .balance(BigDecimal.ZERO.setScale(2))
                 .name(generateUniqueNameForDebit())
+                .currencyCode(currencyCode)
                 .status(AccountStatus.OPEN)
                 .build();
 
@@ -256,6 +262,7 @@ public class DebitAccountServiceImpl implements DebitAccountService {
                 a.getCreatedTime(),
                 a.getBalance(),
                 a.getName(),
+                a.getCurrencyCode(),
                 a.getStatus()
         );
     }

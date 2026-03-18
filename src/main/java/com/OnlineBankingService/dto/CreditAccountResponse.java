@@ -14,6 +14,7 @@ public record CreditAccountResponse(
         LocalTime createdTime,
         BigDecimal balance,
         String name,
+        String CurrencyCode,
         AccountStatus status
 ) {
 }

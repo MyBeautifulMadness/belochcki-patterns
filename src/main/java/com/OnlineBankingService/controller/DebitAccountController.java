@@ -5,6 +5,7 @@ import com.OnlineBankingService.domain.Role;
 import com.OnlineBankingService.dto.AccountOperationResponse;
 import com.OnlineBankingService.dto.DebitAccountResponse;
 import com.OnlineBankingService.dto.MoneyRequest;
+import com.OnlineBankingService.dto.OpenDebitAccountRequest;
 import com.OnlineBankingService.service.DebitAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,8 @@ public class DebitAccountController {
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts")
-    public DebitAccountResponse open(@PathVariable UUID clientId) {
-        return service.open(clientId);
+    public DebitAccountResponse open(@PathVariable UUID clientId, @Valid @RequestBody OpenDebitAccountRequest request) {
+        return service.open(clientId, request);
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/deposit")

@@ -39,6 +39,9 @@ public class DebitAccount {
     @Column(name = "name", nullable = false, length = 16)
     private String name;
 
+    @Column(name = "currency_code", nullable = false, length = 3)
+    private String currencyCode;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 16)
     private AccountStatus status;

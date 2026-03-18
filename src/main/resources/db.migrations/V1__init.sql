@@ -5,6 +5,7 @@ CREATE TABLE debit_account (
     created_time TIME NOT NULL,
     balance NUMERIC(19, 2) NOT NULL DEFAULT 0,
     name VARCHAR(16) NOT NULL,
+    currency_code VARCHAR(3) NOT NULL REFERENCES currency(code),
     status VARCHAR(16) NOT NULL
 );
 
@@ -20,6 +21,7 @@ CREATE TABLE credit_account (
     created_time TIME NOT NULL,
     balance NUMERIC(19, 2) NOT NULL DEFAULT 0,
     name VARCHAR(16) NOT NULL,
+    currency_code VARCHAR(3) NOT NULL REFERENCES currency(code),
     status VARCHAR(16) NOT NULL
 );
 
