@@ -7,6 +7,8 @@ import com.OnlineBankingService.dtos.TokenRequestDto;
 import com.OnlineBankingService.services.AuthService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -40,5 +42,13 @@ public class AuthController {
     @PostMapping("/validate-employee")
     public boolean validateEmployeeToken(@RequestBody TokenRequestDto token) {
         return authService.validateEmployeeByToken(token.token);
+    }
+
+    @PostMapping("/validate-client-or-employee")
+    public boolean validateClientOrEmployee(
+            @RequestHeader("Authorization") String token,
+            @RequestParam UUID clientId
+    ) {
+        return authService.validateClientOrEmployee(token, clientId);
     }
 }

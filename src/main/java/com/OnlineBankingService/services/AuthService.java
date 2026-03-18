@@ -1,12 +1,11 @@
 package com.OnlineBankingService.services;
 
+import com.OnlineBankingService.configs.UserClient;
 import com.OnlineBankingService.dtos.AuthRequestDto;
 import com.OnlineBankingService.dtos.AuthResponseDto;
 import com.OnlineBankingService.entities.Client;
 import com.OnlineBankingService.entities.Employee;
 import com.OnlineBankingService.entities.Status;
-import com.OnlineBankingService.repositories.ClientRepository;
-import com.OnlineBankingService.repositories.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -14,15 +13,12 @@ import java.util.UUID;
 @Service
 public class AuthService {
 
-    private final ClientRepository clientRepository;
-    private final EmployeeRepository employeeRepository;
+    private final UserClient userFeignClient;
     private final JwtService jwtService;
 
-    public AuthService(ClientRepository clientRepository,
-                       EmployeeRepository employeeRepository,
+    public AuthService(UserClient userFeignClient,
                        JwtService jwtService) {
-        this.clientRepository = clientRepository;
-        this.employeeRepository = employeeRepository;
+        this.userFeignClient = userFeignClient;
         this.jwtService = jwtService;
     }
 
@@ -30,8 +26,7 @@ public class AuthService {
 
         if ("EMPLOYEE".equalsIgnoreCase(dto.userType)) {
 
-            Employee employee = employeeRepository.findByLogin(dto.login)
-                    .orElseThrow(() -> new RuntimeException("Employee not found"));
+            Employee employee = userFeignClient.getEmployeeByLogin(dto.login);
 
             if (!employee.password.equals(dto.password)) {
                 throw new RuntimeException("Wrong password");
@@ -39,19 +34,20 @@ public class AuthService {
 
             String token = jwtService.generateToken(employee.id, employee.login, "EMPLOYEE");
             employee.token = token;
-            employeeRepository.save(employee);
 
-            AuthResponseDto res = new AuthResponseDto();
-            res.token = token;
-            res.userId = employee.id;
-            res.userType = "EMPLOYEE";
-            return res;
+            userFeignClient.updateEmployee(employee.id, employee);
+
+            AuthResponseDto responseDto = new AuthResponseDto();
+            responseDto.setToken(token);
+            responseDto.setUserId(employee.id);
+            responseDto.setUserType("EMPLOYEE");
+
+            return responseDto;
         }
 
         if ("CLIENT".equalsIgnoreCase(dto.userType)) {
 
-            Client client = clientRepository.findByLogin(dto.login)
-                    .orElseThrow(() -> new RuntimeException("Client not found"));
+            Client client = userFeignClient.getClientByLogin(dto.login);
 
             if (!client.password.equals(dto.password)) {
                 throw new RuntimeException("Wrong password");
@@ -59,13 +55,15 @@ public class AuthService {
 
             String token = jwtService.generateToken(client.id, client.login, "CLIENT");
             client.token = token;
-            clientRepository.save(client);
 
-            AuthResponseDto res = new AuthResponseDto();
-            res.token = token;
-            res.userId = client.id;
-            res.userType = "CLIENT";
-            return res;
+            userFeignClient.updateClient(client.id, client);
+
+            AuthResponseDto responseDto = new AuthResponseDto();
+            responseDto.setToken(token);
+            responseDto.setUserId(client.id);
+            responseDto.setUserType("EMPLOYEE");
+
+            return responseDto;
         }
 
         throw new RuntimeException("Unknown userType");
@@ -73,59 +71,90 @@ public class AuthService {
 
     public void logout(String token) {
 
-        employeeRepository.findByToken(token).ifPresent(e -> {
-            e.token = null;
-            employeeRepository.save(e);
-        });
+        String vtoken = token.replace("Bearer ", "");
 
-        clientRepository.findByToken(token).ifPresent(c -> {
-            c.token = null;
-            clientRepository.save(c);
-        });
+        String role = jwtService.extractRole(vtoken);
+        UUID userId = jwtService.extractUserId(vtoken);
+
+        if ("EMPLOYEE".equals(role)) {
+            Employee employee = userFeignClient.getEmployeeById(userId);
+            employee.token = null;
+            userFeignClient.updateEmployee(userId, employee);
+            return;
+        }
+
+        if ("CLIENT".equals(role)) {
+            Client client = userFeignClient.getClientById(userId);
+            client.token = null;
+            userFeignClient.updateClient(userId, client);
+            return;
+        }
+
+        throw new RuntimeException("Invalid role");
     }
 
     public Object validateToken(String token) {
 
-        final String vtoken = token.replace("Bearer ", "");
+        String vtoken = token.replace("Bearer ", "");
+
         if (jwtService.isTokenExpired(vtoken)) {
             logout(vtoken);
             throw new RuntimeException("Token expired");
         }
 
-        return employeeRepository.findByToken(vtoken)
-                .<Object>map(e -> {
-                    if (e.status == Status.LOCKED) throw new RuntimeException("Employee locked");
-                    return e;
-                })
-                .orElseGet(() ->
-                        clientRepository.findByToken(vtoken)
-                                .map(c -> {
-                                    if (c.status == Status.LOCKED) throw new RuntimeException("Client locked");
-                                    return c;
-                                })
-                                .orElseThrow(() -> new RuntimeException("Token not found"))
-                );
+        String role = jwtService.extractRole(vtoken);
+        UUID userId = jwtService.extractUserId(vtoken);
+
+        if ("EMPLOYEE".equals(role)) {
+
+            Employee employee = userFeignClient.getEmployeeById(userId);
+
+            if (employee.status == Status.LOCKED) {
+                throw new RuntimeException("Employee locked");
+            }
+
+            if (employee.token == null || !employee.token.equals(vtoken)) {
+                throw new RuntimeException("Token not active");
+            }
+
+            return employee;
+        }
+
+        if ("CLIENT".equals(role)) {
+
+            Client client = userFeignClient.getClientById(userId);
+
+            if (client.status == Status.LOCKED) {
+                throw new RuntimeException("Client locked");
+            }
+
+            if (client.token == null || !client.token.equals(vtoken)) {
+                throw new RuntimeException("Token not active");
+            }
+
+            return client;
+        }
+
+        throw new RuntimeException("Invalid role");
     }
 
     public boolean validateTokenForClient(String token, UUID clientId) {
 
-        Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+        String vtoken = token.replace("Bearer ", "");
 
-        token = token.replace("Bearer ", "");
-        if (jwtService.isTokenExpired(token)) {
-            client.token = null;
-            clientRepository.save(client);
+        if (jwtService.isTokenExpired(vtoken)) {
             throw new RuntimeException("Token expired");
         }
 
-        UUID tokenUserId = jwtService.extractUserId(token);
+        UUID tokenUserId = jwtService.extractUserId(vtoken);
 
-        if (!tokenUserId.equals(client.id)) {
+        if (!tokenUserId.equals(clientId)) {
             throw new RuntimeException("Token does not belong to this client");
         }
 
-        if (client.token == null || !client.token.equals(token)) {
+        Client client = userFeignClient.getClientById(clientId);
+
+        if (client.token == null || !client.token.equals(vtoken)) {
             throw new RuntimeException("Token is not active for this client");
         }
 
@@ -137,58 +166,79 @@ public class AuthService {
     }
 
     public boolean validateEmployeeByToken(String token) {
-        token = token.replace("Bearer ", "");
-        if (jwtService.isTokenExpired(token)) {
+
+        String vtoken = token.replace("Bearer ", "");
+
+        if (jwtService.isTokenExpired(vtoken)) {
             throw new RuntimeException("Token expired");
         }
 
-        UUID employeeId = jwtService.extractUserId(token);
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        String role = jwtService.extractRole(vtoken);
+
+        if (!"EMPLOYEE".equals(role)) {
+            throw new RuntimeException("Not an employee token");
+        }
+
+        UUID employeeId = jwtService.extractUserId(vtoken);
+
+        Employee employee = userFeignClient.getEmployeeById(employeeId);
 
         if (employee.status == Status.LOCKED) {
             throw new RuntimeException("Employee is locked");
+        }
+
+        if (employee.token == null || !employee.token.equals(vtoken)) {
+            throw new RuntimeException("Token not active");
         }
 
         return true;
     }
 
     public boolean validateClientOrEmployee(String token, UUID clientId) {
-        token = token.replace("Bearer ", "");
-        boolean clientValid = false;
-        boolean employeeValid = false;
 
-        try {
-            Client client = clientRepository.findById(clientId)
-                    .orElseThrow(() -> new RuntimeException("Client not found"));
+        String vtoken = token.replace("Bearer ", "");
 
-            if (!jwtService.isTokenExpired(token) &&
-                    jwtService.extractUserId(token).equals(client.id) &&
-                    token.equals(client.token) &&
-                    client.status != Status.LOCKED) {
+        if (jwtService.isTokenExpired(vtoken)) {
+            throw new RuntimeException("Token expired");
+        }
 
-                clientValid = true;
+        String role = jwtService.extractRole(vtoken);
+        UUID userId = jwtService.extractUserId(vtoken);
+
+        if ("CLIENT".equals(role)) {
+
+            if (!userId.equals(clientId)) {
+                throw new RuntimeException("Token does not belong to this client");
             }
-        } catch (RuntimeException e) {
-        }
 
-        try {
-            UUID employeeId = jwtService.extractUserId(token);
-            Employee employee = employeeRepository.findById(employeeId)
-                    .orElseThrow(() -> new RuntimeException("Employee not found"));
+            Client client = userFeignClient.getClientById(clientId);
 
-            if (!jwtService.isTokenExpired(token) &&
-                    employee.status != Status.LOCKED) {
-
-                employeeValid = true;
+            if (client.token == null || !client.token.equals(vtoken)) {
+                throw new RuntimeException("Token not active");
             }
-        } catch (RuntimeException e) {
+
+            if (client.status == Status.LOCKED) {
+                throw new RuntimeException("Client locked");
+            }
+
+            return true;
         }
 
-        if (!clientValid && !employeeValid) {
-            throw new RuntimeException("Token is invalid for both client and employee");
+        if ("EMPLOYEE".equals(role)) {
+
+            Employee employee = userFeignClient.getEmployeeById(userId);
+
+            if (employee.status == Status.LOCKED) {
+                throw new RuntimeException("Employee locked");
+            }
+
+            if (employee.token == null || !employee.token.equals(vtoken)) {
+                throw new RuntimeException("Token not active");
+            }
+
+            return true;
         }
 
-        return true;
+        throw new RuntimeException("Invalid role");
     }
 }
