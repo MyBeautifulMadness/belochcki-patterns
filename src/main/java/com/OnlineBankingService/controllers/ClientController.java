@@ -52,4 +52,14 @@ public class ClientController {
     public Client unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
         return clientService.unlock(id,token);
     }
+
+    @GetMapping("/login")
+    public Client getByLogin(@RequestParam String login) {
+        return clientService.findByLogin(login);
+    }
+
+    @GetMapping("/token")
+    public Client getByToken(@RequestParam String token) {
+        return clientService.findByToken(token);
+    }
 }
