@@ -1,6 +1,7 @@
 package com.OnlineBankingService.configs;
 
 import com.OnlineBankingService.dtos.CreateClientDto;
+import com.OnlineBankingService.dtos.UpdateCreditRatingRequest;
 import com.OnlineBankingService.entities.Client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -30,4 +31,10 @@ public interface ClientClient {
 
     @PatchMapping("/{id}/unlock")
     Client unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token);
+
+    @GetMapping("/credit-rating")
+    Integer getCreditRating(@RequestParam UUID id);
+
+    @PutMapping("/credit-rating")
+    Integer updateCreditRating(@RequestBody UpdateCreditRatingRequest request);
 }

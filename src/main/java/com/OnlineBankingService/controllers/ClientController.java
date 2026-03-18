@@ -2,6 +2,7 @@ package com.OnlineBankingService.controllers;
 
 import com.OnlineBankingService.configs.ClientClient;
 import com.OnlineBankingService.dtos.CreateClientDto;
+import com.OnlineBankingService.dtos.UpdateCreditRatingRequest;
 import com.OnlineBankingService.entities.Client;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,5 +52,17 @@ public class ClientController {
     @PatchMapping("/{id}/unlock")
     public Client unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
         return clientClient.unlock(id,token);
+    }
+
+    @GetMapping("/credit-rating")
+    public Integer getCreditRating(@RequestParam UUID id) {
+        return clientClient.getCreditRating(id);
+    }
+
+    @PutMapping("/credit-rating")
+    public Integer updateCreditRating(@RequestBody UpdateCreditRatingRequest request) {
+        return clientClient.updateCreditRating(
+                request
+        );
     }
 }
