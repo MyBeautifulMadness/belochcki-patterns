@@ -107,4 +107,20 @@ public class ClientService {
 
         return clientRepository.save(client);
     }
+
+    public Integer getCreditRating(UUID userId) {
+        return clientRepository.findById(userId)
+                .map(Client::getCreditRating)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+    }
+
+    public Integer updateCreditRating(UUID userId, Integer newValue) {
+        Client user = clientRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+
+        user.setCreditRating(newValue);
+        clientRepository.save(user);
+
+        return newValue;
+    }
 }

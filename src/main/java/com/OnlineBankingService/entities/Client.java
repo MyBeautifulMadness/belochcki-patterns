@@ -1,10 +1,15 @@
 package com.OnlineBankingService.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.UUID;
 
 @Entity
 @Table(name = "clients")
+@Getter
+@Setter
 public class Client {
 
     @Id
@@ -24,4 +29,7 @@ public class Client {
 
     @Column(length = 1000)
     public String token;
+
+    @Column(nullable = false)
+    private Integer creditRating = 100;
 }
