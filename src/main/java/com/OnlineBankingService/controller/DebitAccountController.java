@@ -2,10 +2,7 @@ package com.OnlineBankingService.controller;
 
 import com.OnlineBankingService.domain.AccountType;
 import com.OnlineBankingService.domain.Role;
-import com.OnlineBankingService.dto.AccountOperationResponse;
-import com.OnlineBankingService.dto.DebitAccountResponse;
-import com.OnlineBankingService.dto.MoneyRequest;
-import com.OnlineBankingService.dto.OpenDebitAccountRequest;
+import com.OnlineBankingService.dto.*;
 import com.OnlineBankingService.service.DebitAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,4 +56,8 @@ public class DebitAccountController {
         return service.getOperations(accountId, pageable, clientId, role, accountType);
     }
 
+    @PostMapping("/clients/{clientId}/debit-accounts/transfer")
+    public TransferResponse transfer(@PathVariable UUID clientId, @Valid @RequestBody TransferRequest request) {
+        return service.transfer(clientId, request);
+    }
 }

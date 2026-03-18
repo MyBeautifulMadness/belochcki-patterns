@@ -25,4 +25,6 @@ public interface DebitAccountService {
     DebitAccountResponse withdrawByCreditService(UUID debitAccountId, CreditServiceWithdrawRequest request, UUID clientId);
 
     DebitAccountResponse getById(UUID clientId, UUID accountId, Role role);
+
+    TransferResponse transfer(UUID clientId, TransferRequest request);
 }

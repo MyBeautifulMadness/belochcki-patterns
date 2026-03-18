@@ -16,6 +16,7 @@ import com.OnlineBankingService.repository.CreditAccountRepository;
 import com.OnlineBankingService.repository.DebitAccountRepository;
 import com.OnlineBankingService.service.CurrencyService;
 import com.OnlineBankingService.service.DebitAccountService;
+import com.OnlineBankingService.service.ExchangeRateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,7 @@ public class DebitAccountServiceImpl implements DebitAccountService {
     private final CreditAccountRepository creditAccountRepository;
     private final AccountNameGenerator nameGenerator;
     private final CurrencyService currencyService;
+    private final ExchangeRateService exchangeRateService;
 
     @Override
     @Transactional
@@ -232,6 +234,95 @@ public class DebitAccountServiceImpl implements DebitAccountService {
         var account = accountRepository.findById(debitAccountId)
                 .orElseThrow(() -> new NotFoundException("Account not found"));
         return toResponse(account);
+    }
+
+    @Override
+    @Transactional
+    public TransferResponse transfer(UUID clientId, TransferRequest request) {
+        if (request.fromAccountId().equals(request.toAccountId())) {
+            throw new ConflictException("Source and destination accounts must be different");
+        }
+
+        DebitAccount fromAccount = accountRepository.findById(request.fromAccountId())
+                .orElseThrow(() -> new NotFoundException("Source account not found: " + request.fromAccountId()));
+
+        DebitAccount toAccount = accountRepository.findById(request.toAccountId())
+                .orElseThrow(() -> new NotFoundException("Destination account not found: " + request.toAccountId()));
+
+        if (!fromAccount.getClientId().equals(clientId)) {
+            throw new ForbiddenException("You cannot transfer money from someone else's account");
+        }
+
+        if (fromAccount.getStatus() != AccountStatus.OPEN) {
+            throw new ConflictException("Source account is closed");
+        }
+
+        if (toAccount.getStatus() != AccountStatus.OPEN) {
+            throw new ConflictException("Destination account is closed");
+        }
+
+        BigDecimal debitAmount = request.amount().setScale(2);
+        BigDecimal creditAmount;
+
+        if (fromAccount.getBalance().compareTo(debitAmount) < 0) {
+            throw new ConflictException("Insufficient funds");
+        }
+
+        if (fromAccount.getCurrencyCode().equals(toAccount.getCurrencyCode())) {
+            creditAmount = debitAmount;
+        } else {
+            creditAmount = exchangeRateService.convert(
+                    debitAmount,
+                    fromAccount.getCurrencyCode(),
+                    toAccount.getCurrencyCode()
+            );
+        }
+
+        BigDecimal newFromBalance = accountRepository.applyDeltaReturningBalance(
+                fromAccount.getId(),
+                fromAccount.getClientId(),
+                debitAmount.negate()
+        );
+
+        if (newFromBalance == null) {
+            throw new ConflictException("Failed to debit source account");
+        }
+
+        BigDecimal newToBalance = accountRepository.applyDeltaReturningBalanceWithoutClientCheck(
+                toAccount.getId(),
+                creditAmount
+        );
+
+        if (newToBalance == null) {
+            throw new ConflictException("Failed to credit destination account");
+        }
+
+        String baseComment = request.comment() == null || request.comment().isBlank()
+                ? "Transfer"
+                : request.comment();
+
+        saveOperation(
+                fromAccount.getId(),
+                debitAmount,
+                baseComment + " -> to account " + toAccount.getName(),
+                OperationType.TRANSFER_OUT
+        );
+
+        saveOperation(
+                toAccount.getId(),
+                creditAmount,
+                baseComment + " <- from account " + fromAccount.getName(),
+                OperationType.TRANSFER_IN
+        );
+
+        return new TransferResponse(
+                fromAccount.getId(),
+                toAccount.getId(),
+                debitAmount,
+                creditAmount,
+                fromAccount.getCurrencyCode(),
+                toAccount.getCurrencyCode()
+        );
     }
 
     private void ensureAccountExists(UUID accountId) {

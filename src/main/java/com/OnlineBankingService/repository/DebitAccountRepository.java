@@ -42,4 +42,15 @@ public interface DebitAccountRepository extends JpaRepository<DebitAccount, UUID
       """, nativeQuery = true)
     UUID closeIfZeroBalance(@Param("id") UUID id,
                             @Param("clientId") UUID clientId);
+
+    @Query(value = """
+      UPDATE debit_account
+      SET balance = balance + :delta
+      WHERE id = :id
+        AND status = 'OPEN'
+        AND (balance + :delta) >= 0
+      RETURNING balance
+      """, nativeQuery = true)
+    BigDecimal applyDeltaReturningBalanceWithoutClientCheck(@Param("id") UUID id,
+                                                            @Param("delta") BigDecimal delta);
 }
