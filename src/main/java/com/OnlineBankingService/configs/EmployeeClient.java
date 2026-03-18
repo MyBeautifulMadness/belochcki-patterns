@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "employee-service", url = "http://localhost:8083/api/employees")
+@FeignClient(name = "employee-service", url = "http://localhost:8082/api/employees")
 public interface EmployeeClient {
     @GetMapping
     List<Employee> getAll();
