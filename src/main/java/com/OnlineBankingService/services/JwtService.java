@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -15,11 +16,11 @@ public class JwtService {
     private static final Key key = Keys.hmacShaKeyFor("MySuperSecretKeyThatIsLongEnough123456".getBytes());
     private final long EXPIRATION = 1000 * 60 * 60;
 
-    public String generateToken(UUID userId, String login, String role) {
+    public String generateToken(UUID userId, String login, List<String> roles) {
         return Jwts.builder()
                 .setSubject(userId.toString())
+                .claim("scope", String.join(" ", roles))
                 .claim("login", login)
-                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(key)

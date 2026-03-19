@@ -8,6 +8,8 @@ import com.OnlineBankingService.entities.Employee;
 import com.OnlineBankingService.entities.Status;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,52 +24,58 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+
     public AuthResponseDto login(AuthRequestDto dto) {
 
-        if ("EMPLOYEE".equalsIgnoreCase(dto.userType)) {
+        List<String> roles = new ArrayList<>();
+        UUID userId = null;
 
+        try {
+            System.out.println("Calling employee service...");
             Employee employee = userFeignClient.getEmployeeByLogin(dto.login);
+            System.out.println("Employee response: " + employee);
 
-            if (!employee.password.equals(dto.password)) {
-                throw new RuntimeException("Wrong password");
+            if (employee.password.equals(dto.password)) {
+                roles.add("EMPLOYEE");
+                userId = employee.id;
             }
 
-            String token = jwtService.generateToken(employee.id, employee.login, "EMPLOYEE");
-            employee.token = token;
-
-            //userFeignClient.updateEmployee(employee.id, employee);
-
-            AuthResponseDto responseDto = new AuthResponseDto();
-            responseDto.setToken(token);
-            responseDto.setUserId(employee.id);
-            responseDto.setUserType("EMPLOYEE");
-
-            return responseDto;
+        } catch (Exception e) {
+            System.out.println("Employee ERROR:");
+            e.printStackTrace();
         }
 
-        if ("CLIENT".equalsIgnoreCase(dto.userType)) {
-
+        try {
+            System.out.println("Calling client service...");
             Client client = userFeignClient.getClientByLogin(dto.login);
+            System.out.println("Client response: " + client);
 
-            if (!client.password.equals(dto.password)) {
-                throw new RuntimeException("Wrong password");
+            if (client.password.equals(dto.password)) {
+                roles.add("CLIENT");
+                userId = client.id;
             }
 
-            String token = jwtService.generateToken(client.id, client.login, "CLIENT");
-            client.token = token;
-
-            //userFeignClient.updateClient(client.id, client);
-
-            AuthResponseDto responseDto = new AuthResponseDto();
-            responseDto.setToken(token);
-            responseDto.setUserId(client.id);
-            responseDto.setUserType("CLIENT");
-
-            return responseDto;
+        } catch (Exception e) {
+            System.out.println("Client ERROR:");
+            e.printStackTrace();
         }
 
-        throw new RuntimeException("Unknown userType");
+        System.out.println("Roles: " + roles);
+
+        if (roles.isEmpty()) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        String token = jwtService.generateToken(userId, dto.login, roles);
+
+        AuthResponseDto responseDto = new AuthResponseDto();
+        responseDto.setToken(token);
+        responseDto.setUserId(userId);
+        responseDto.setUserType("CLIENT");
+
+        return responseDto;
     }
+
 
     public void logout(String token) {
 
