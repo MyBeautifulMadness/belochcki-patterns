@@ -1,9 +1,6 @@
 package com.OnlineBankingService.controllers;
 
-import com.OnlineBankingService.dtos.AccountDto;
-import com.OnlineBankingService.dtos.AccountOperationResponse;
-import com.OnlineBankingService.dtos.MoneyRequest;
-import com.OnlineBankingService.dtos.PagedResponse;
+import com.OnlineBankingService.dtos.*;
 import com.OnlineBankingService.entities.AccountType;
 import com.OnlineBankingService.entities.Role;
 import com.OnlineBankingService.services.CoreGatewayService;
@@ -34,10 +31,9 @@ public class CoreGatewayController {
 
     @PostMapping("/clients/{clientId}/debit-accounts")
     public AccountDto openAccount(
-            @RequestHeader("Authorization") String authorization,
-            @PathVariable UUID clientId
+            @PathVariable UUID clientId, @Valid @RequestBody OpenDebitAccountRequest request
     ) {
-        return gatewayService.openAccount(extractToken(authorization), clientId);
+        return gatewayService.openAccount(clientId, request);
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/close")
@@ -139,5 +135,49 @@ public class CoreGatewayController {
         return gatewayService.operationsCredit(extractToken(authorization), clientId, accountId, pageable);
     }
 
+    @PostMapping("/clients/{clientId}/debit-accounts/transfer")
+    TransferResponse transfer(@PathVariable UUID clientId, @Valid @RequestBody TransferRequest request){
+        return gatewayService.transfer(clientId, request);
+    }
+
+    @GetMapping("/currencies")
+    List<CurrencyResponse> getAll(){
+        return gatewayService.getAll();
+    }
+
+    @PostMapping("/currencies")
+    CurrencyResponse create(@Valid @RequestBody CreateCurrencyRequest request){
+        return gatewayService.create(request);
+    }
+
+    @PatchMapping("/currencies/{code}/deactivate")
+    CurrencyResponse deactivate(@PathVariable String code){
+        return gatewayService.deactivate(code);
+    }
+
+    @PostMapping("/master-account")
+    MasterAccountResponse createMaster(@Valid @RequestBody CreateMasterAccountRequest request){
+        return gatewayService.createMaster(request);
+    }
+
+    @GetMapping("/master-account")
+    MasterAccountResponse get(){
+        return gatewayService.get();
+    }
+
+    @PostMapping("/master-account/deposit")
+    MasterAccountResponse depositMaster(@Valid @RequestBody MoneyRequest request){
+        return gatewayService.depositMaster(request);
+    }
+
+    @PostMapping("/master-account/withdraw")
+    MasterAccountResponse withdrawMaster(@Valid @RequestBody MoneyRequest request){
+        return gatewayService.withdrawMaster(request);
+    }
+
+    @PostMapping("/master-account/internal/deposit")
+    MasterAccountResponse internalDeposit(@Valid @RequestBody MoneyRequest request){
+        return gatewayService.internalDeposit(request);
+    }
 
 }

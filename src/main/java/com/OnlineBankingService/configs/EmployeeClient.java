@@ -33,4 +33,7 @@ public interface EmployeeClient {
 
     @PatchMapping("/{id}/unlock")
     Employee unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token);
+
+    @GetMapping("/token")
+    Employee getByToken(@RequestParam String token);
 }

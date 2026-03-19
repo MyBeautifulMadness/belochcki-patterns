@@ -65,4 +65,9 @@ public class ClientController {
                 request
         );
     }
+
+    @GetMapping("/token")
+    public Client getByToken(@RequestParam String token) {
+        return clientClient.getByToken(token);
+    }
 }

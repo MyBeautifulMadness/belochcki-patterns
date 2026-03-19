@@ -1,9 +1,6 @@
 package com.OnlineBankingService.configs;
 
-import com.OnlineBankingService.dtos.AccountOperationResponse;
-import com.OnlineBankingService.dtos.AccountDto;
-import com.OnlineBankingService.dtos.MoneyRequest;
-import com.OnlineBankingService.dtos.PagedResponse;
+import com.OnlineBankingService.dtos.*;
 import com.OnlineBankingService.entities.AccountType;
 import com.OnlineBankingService.entities.Role;
 import jakarta.validation.Valid;
@@ -18,7 +15,7 @@ import java.util.UUID;
 public interface CoreClient {
 
     @PostMapping("/clients/{clientId}/debit-accounts")
-    AccountDto openAccount(@PathVariable UUID clientId);
+    AccountDto open(@PathVariable UUID clientId, @Valid @RequestBody OpenDebitAccountRequest request);
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/close")
     AccountDto closeAccount(@PathVariable UUID clientId, @PathVariable UUID accountId);
@@ -56,5 +53,32 @@ public interface CoreClient {
     AccountDto withdrawCredit(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request);
 
     @GetMapping("/clients/{clientId}/credit-accounts/{accountId}/operations")
-   PagedResponse<AccountOperationResponse> operationsCredit(@PathVariable UUID clientId, @PathVariable UUID accountId, Pageable pageable);
+    PagedResponse<AccountOperationResponse> operationsCredit(@PathVariable UUID clientId, @PathVariable UUID accountId, Pageable pageable);
+
+    @PostMapping("/clients/{clientId}/debit-accounts/transfer")
+    TransferResponse transfer(@PathVariable UUID clientId, @Valid @RequestBody TransferRequest request);
+
+    @GetMapping("/currencies")
+    List<CurrencyResponse> getAll();
+
+    @PostMapping("/currencies")
+    CurrencyResponse create(@Valid @RequestBody CreateCurrencyRequest request);
+
+    @PatchMapping("/currencies/{code}/deactivate")
+    CurrencyResponse deactivate(@PathVariable String code);
+
+    @PostMapping("/master-account")
+    MasterAccountResponse createMaster(@Valid @RequestBody CreateMasterAccountRequest request);
+
+    @GetMapping("/master-account")
+    MasterAccountResponse get();
+
+    @PostMapping("/master-account/deposit")
+    MasterAccountResponse depositMaster(@Valid @RequestBody MoneyRequest request);
+
+    @PostMapping("/master-account/withdraw")
+    MasterAccountResponse withdrawMaster(@Valid @RequestBody MoneyRequest request);
+
+    @PostMapping("/master-account/internal/deposit")
+    MasterAccountResponse internalDeposit(@Valid @RequestBody MoneyRequest request);
 }

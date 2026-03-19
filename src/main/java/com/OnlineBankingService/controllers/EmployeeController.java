@@ -57,4 +57,9 @@ public class EmployeeController {
     public Employee unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
         return employeeClient.unlock(id, token);
     }
+
+    @GetMapping("/token")
+    public Employee getByToken(@RequestParam String token) {
+        return employeeClient.getByToken(token);
+    }
 }

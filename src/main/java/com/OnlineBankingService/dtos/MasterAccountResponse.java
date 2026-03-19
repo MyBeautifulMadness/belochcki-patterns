@@ -7,9 +7,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-public record AccountDto(
+public record MasterAccountResponse(
         UUID id,
-        UUID clientId,
         LocalDate createdDate,
         LocalTime createdTime,
         BigDecimal balance,

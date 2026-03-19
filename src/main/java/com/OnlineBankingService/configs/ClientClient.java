@@ -37,4 +37,7 @@ public interface ClientClient {
 
     @PutMapping("/credit-rating")
     Integer updateCreditRating(@RequestBody UpdateCreditRatingRequest request);
+
+    @GetMapping("/token")
+    Client getByToken(@RequestParam String token);
 }

@@ -24,7 +24,8 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers("/api/auth/**").permitAll()
-
+                        .requestMatchers("/api/employees/test").permitAll()
+                        .requestMatchers("/api/clients/token").hasAnyAuthority("SCOPE_CLIENT", "SCOPE_EMPLOYEE")
                         .requestMatchers("/api/employees/**").hasAuthority("SCOPE_EMPLOYEE")
                         .requestMatchers("/api/clients/**").hasAnyAuthority("SCOPE_CLIENT", "SCOPE_EMPLOYEE")
 
