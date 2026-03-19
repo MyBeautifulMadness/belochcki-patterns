@@ -23,7 +23,7 @@ public class AccrualInterestForCreditService {
     private final ClientCreditRepository clientCreditRepository;
     private final CreditTariffRepository creditTariffRepository;
 
-    @Scheduled(fixedRate = 60000) //60000
+    @Scheduled(fixedRate = 3600000) //60000
     @Transactional
     public void accualInterest(){
 

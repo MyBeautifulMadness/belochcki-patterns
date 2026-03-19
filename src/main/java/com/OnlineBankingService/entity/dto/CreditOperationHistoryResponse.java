@@ -17,6 +17,7 @@ public class CreditOperationHistoryResponse {
 
     private UUID id;
     private UUID clientCreditId;
+    private UUID clientId;
     private LocalDate date;
     private LocalTime time;
     private BigDecimal amount;

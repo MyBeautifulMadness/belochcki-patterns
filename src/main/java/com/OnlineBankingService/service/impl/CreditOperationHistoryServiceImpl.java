@@ -83,6 +83,7 @@ public class CreditOperationHistoryServiceImpl implements CreditOperationHistory
                         .comment(operation.getComment())
                         .operationType(operation.getOperationType())
                         .clientCreditId(operation.getClientCreditId().getId())
+                        .clientId(operation.getClientCreditId().getClientId())
                         .build())
                 .toList();
 
