@@ -11,6 +11,11 @@ spring:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: MySuperSecretKeyThatIsLongEnough123456
 
 server:
   port: 8085 #изменить на свой сервис: credit service(8084), info service(8085), core(8081)

@@ -13,20 +13,4 @@ public interface AuthClient {
 
     @PostMapping("/login")
     AuthResponseDto login(@RequestBody AuthRequestDto dto);
-
-    @PostMapping("/logout")
-    void logout(@RequestBody TokenRequestDto dto);
-
-    @PostMapping("/validate")
-    boolean validate(@RequestBody TokenRequestDto dto);
-
-    @PostMapping("/validate-client")
-    boolean validateClient(
-            @RequestBody TokenClientRequestDto dto
-    );
-
-    @PostMapping("/validate-employee")
-    boolean validateEmployee(
-            @RequestBody TokenRequestDto dto
-    );
 }

@@ -21,24 +21,4 @@ public class AuthController {
     public AuthResponseDto login(@RequestBody AuthRequestDto dto) {
         return authClient.login(dto);
     }
-
-    @PostMapping("/logout")
-    public void logout(@RequestBody TokenRequestDto dto) {
-        authClient.logout(dto);
-    }
-
-    @PostMapping("/validate")
-    public boolean validate(@RequestBody TokenRequestDto dto) {
-        return authClient.validate(dto);
-    }
-
-    @PostMapping("/validate-client")
-    public boolean validateClientToken(@RequestBody TokenClientRequestDto dto) {
-        return authClient.validateClient(dto);
-    }
-
-    @PostMapping("/validate-employee")
-    public boolean validateEmployeeToken(@RequestBody TokenRequestDto token) {
-        return authClient.validateEmployee(token);
-    }
 }
