@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -261,27 +262,29 @@ public class DebitAccountServiceImpl implements DebitAccountService {
             throw new ConflictException("Destination account is closed");
         }
 
-        BigDecimal debitAmount = request.amount().setScale(2);
-        BigDecimal creditAmount;
+        BigDecimal debitedAmount = request.amount().setScale(2);
 
-        if (fromAccount.getBalance().compareTo(debitAmount) < 0) {
+        if (fromAccount.getBalance().compareTo(debitedAmount) < 0) {
             throw new ConflictException("Insufficient funds");
         }
 
-        if (fromAccount.getCurrencyCode().equals(toAccount.getCurrencyCode())) {
-            creditAmount = debitAmount;
+        BigDecimal rate = BigDecimal.ONE;
+        BigDecimal creditedAmount;
+
+        if (fromAccount.getCurrencyCode().equalsIgnoreCase(toAccount.getCurrencyCode())) {
+            creditedAmount = debitedAmount;
         } else {
-            creditAmount = exchangeRateService.convert(
-                    debitAmount,
+            rate = exchangeRateService.getRate(
                     fromAccount.getCurrencyCode(),
                     toAccount.getCurrencyCode()
             );
+            creditedAmount = debitedAmount.multiply(rate).setScale(2, RoundingMode.HALF_UP);
         }
 
         BigDecimal newFromBalance = accountRepository.applyDeltaReturningBalance(
                 fromAccount.getId(),
                 fromAccount.getClientId(),
-                debitAmount.negate()
+                debitedAmount.negate()
         );
 
         if (newFromBalance == null) {
@@ -290,7 +293,7 @@ public class DebitAccountServiceImpl implements DebitAccountService {
 
         BigDecimal newToBalance = accountRepository.applyDeltaReturningBalanceWithoutClientCheck(
                 toAccount.getId(),
-                creditAmount
+                creditedAmount
         );
 
         if (newToBalance == null) {
@@ -303,25 +306,30 @@ public class DebitAccountServiceImpl implements DebitAccountService {
 
         saveOperation(
                 fromAccount.getId(),
-                debitAmount,
-                baseComment + " -> to account " + toAccount.getName(),
+                debitedAmount,
+                baseComment + " -> to account " + toAccount.getName()
+                        + ", rate=" + rate
+                        + ", " + fromAccount.getCurrencyCode() + "->" + toAccount.getCurrencyCode(),
                 OperationType.TRANSFER_OUT
         );
 
         saveOperation(
                 toAccount.getId(),
-                creditAmount,
-                baseComment + " <- from account " + fromAccount.getName(),
+                creditedAmount,
+                baseComment + " <- from account " + fromAccount.getName()
+                        + ", rate=" + rate
+                        + ", " + fromAccount.getCurrencyCode() + "->" + toAccount.getCurrencyCode(),
                 OperationType.TRANSFER_IN
         );
 
         return new TransferResponse(
                 fromAccount.getId(),
                 toAccount.getId(),
-                debitAmount,
-                creditAmount,
+                debitedAmount,
+                creditedAmount,
                 fromAccount.getCurrencyCode(),
-                toAccount.getCurrencyCode()
+                toAccount.getCurrencyCode(),
+                rate
         );
     }
 

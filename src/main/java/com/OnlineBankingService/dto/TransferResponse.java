@@ -9,6 +9,7 @@ public record TransferResponse(
         BigDecimal debitedAmount,
         BigDecimal creditedAmount,
         String fromCurrencyCode,
-        String toCurrencyCode
+        String toCurrencyCode,
+        BigDecimal appliedRate
 ) {
 }

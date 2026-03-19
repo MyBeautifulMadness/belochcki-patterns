@@ -14,5 +14,10 @@ spring:
   flyway:
     enabled: true
 
+exchange-rate:
+  api:
+    base-url: https://v6.exchangerate-api.com
+    key: 5cc8c7c02bb8c92a81b2eb34
+
 server:
   port: 8081 #изменить на свой сервис: credit service(8084), info service(8085), core(8081)

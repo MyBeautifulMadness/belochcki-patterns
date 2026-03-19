@@ -1,39 +1,31 @@
 package com.OnlineBankingService.service.impl;
 
-import com.OnlineBankingService.exception.NotFoundException;
+import com.OnlineBankingService.service.ExchangeRateClient;
 import com.OnlineBankingService.service.ExchangeRateService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class ExchangeRateServiceImpl implements ExchangeRateService {
 
-    private static final Map<String, BigDecimal> TO_RUB = Map.of(
-            "RUB", BigDecimal.ONE,
-            "USD", new BigDecimal("90.00"),
-            "EUR", new BigDecimal("98.00")
-    );
+    private final ExchangeRateClient exchangeRateClient;
 
     @Override
     public BigDecimal convert(BigDecimal amount, String fromCurrencyCode, String toCurrencyCode) {
-        if (fromCurrencyCode.equals(toCurrencyCode)) {
+        if (fromCurrencyCode.equalsIgnoreCase(toCurrencyCode)) {
             return amount.setScale(2, RoundingMode.HALF_UP);
         }
 
-        BigDecimal fromRate = TO_RUB.get(fromCurrencyCode);
-        BigDecimal toRate = TO_RUB.get(toCurrencyCode);
+        BigDecimal rate = exchangeRateClient.getRate(fromCurrencyCode, toCurrencyCode);
+        return amount.multiply(rate).setScale(2, RoundingMode.HALF_UP);
+    }
 
-        if (fromRate == null) {
-            throw new NotFoundException("Exchange rate not found for currency: " + fromCurrencyCode);
-        }
-        if (toRate == null) {
-            throw new NotFoundException("Exchange rate not found for currency: " + toCurrencyCode);
-        }
-
-        BigDecimal amountInRub = amount.multiply(fromRate);
-        return amountInRub.divide(toRate, 2, RoundingMode.HALF_UP);
+    @Override
+    public BigDecimal getRate(String fromCurrencyCode, String toCurrencyCode) {
+        return exchangeRateClient.getRate(fromCurrencyCode, toCurrencyCode);
     }
 }
