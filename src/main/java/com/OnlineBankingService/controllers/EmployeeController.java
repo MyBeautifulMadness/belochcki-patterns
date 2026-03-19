@@ -34,7 +34,6 @@ public class EmployeeController {
         return employeeService.create(employee);
     }
 
-    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @PostMapping("/test")
     public Employee createTest(@RequestBody CreateEmployeeDto employee) {
         return employeeService.createTest(employee);
