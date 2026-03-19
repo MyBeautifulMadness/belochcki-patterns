@@ -3,6 +3,7 @@ package com.OnlineBankingService.controllers;
 import com.OnlineBankingService.dtos.CreateEmployeeDto;
 import com.OnlineBankingService.entities.Employee;
 import com.OnlineBankingService.services.EmployeeService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,33 +30,38 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public Employee create(@RequestBody CreateEmployeeDto employee, @RequestHeader("Authorization") String authorization) {
-        return employeeService.create(employee, authorization);
+    public Employee create(@RequestBody CreateEmployeeDto employee) {
+        return employeeService.create(employee);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @PostMapping("/test")
     public Employee createTest(@RequestBody CreateEmployeeDto employee) {
         return employeeService.createTest(employee);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @PutMapping("/{id}")
-    public Employee update(@RequestHeader("Authorization") String authorization, @PathVariable UUID id, @RequestBody Employee employee) {
-        return employeeService.update(id, employee, authorization);
+    public Employee update(@PathVariable UUID id, @RequestBody Employee employee) {
+        return employeeService.update(id, employee);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable UUID id, @RequestHeader("Authorization") String authorization) {
-        employeeService.delete(id, authorization);
+    public void delete(@PathVariable UUID id) {
+        employeeService.delete(id);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @PatchMapping("/{id}/lock")
-    public Employee lock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
-        return employeeService.lock(id, token);
+    public Employee lock(@PathVariable UUID id) {
+        return employeeService.lock(id);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @PatchMapping("/{id}/unlock")
-    public Employee unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
-        return employeeService.unlock(id, token);
+    public Employee unlock(@PathVariable UUID id) {
+        return employeeService.unlock(id);
     }
 
     @GetMapping("/login")

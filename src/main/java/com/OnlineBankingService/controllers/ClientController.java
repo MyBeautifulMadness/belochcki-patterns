@@ -4,6 +4,7 @@ import com.OnlineBankingService.dtos.CreateClientDto;
 import com.OnlineBankingService.dtos.UpdateCreditRatingRequest;
 import com.OnlineBankingService.entities.Client;
 import com.OnlineBankingService.services.ClientService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,29 +30,34 @@ public class ClientController {
         return clientService.findById(id);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @PostMapping
-    public Client create(@RequestHeader("Authorization") String authorization, @RequestBody CreateClientDto client) {
-        return clientService.create(client, authorization);
+    public Client create(@RequestBody CreateClientDto client) {
+        return clientService.create(client);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @PutMapping("/{id}")
-    public Client update(@RequestHeader("Authorization") String authorization, @PathVariable UUID id, @RequestBody Client client) {
-        return clientService.update(id, client, authorization);
+    public Client update(@PathVariable UUID id, @RequestBody Client client) {
+        return clientService.update(id, client);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @DeleteMapping("/{id}")
-    public void delete(@RequestHeader("Authorization") String authorization, @PathVariable UUID id) {
-        clientService.delete(id, authorization);
+    public void delete(@PathVariable UUID id) {
+        clientService.delete(id);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @PatchMapping("/{id}/lock")
-    public Client lock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
-        return clientService.lock(id, token);
+    public Client lock(@PathVariable UUID id) {
+        return clientService.lock(id);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
     @PatchMapping("/{id}/unlock")
-    public Client unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
-        return clientService.unlock(id,token);
+    public Client unlock(@PathVariable UUID id) {
+        return clientService.unlock(id);
     }
 
     @GetMapping("/login")

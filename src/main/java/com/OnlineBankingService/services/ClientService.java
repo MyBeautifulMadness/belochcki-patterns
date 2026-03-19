@@ -1,8 +1,6 @@
 package com.OnlineBankingService.services;
 
-import com.OnlineBankingService.configs.AuthClient;
 import com.OnlineBankingService.dtos.CreateClientDto;
-import com.OnlineBankingService.dtos.TokenRequestDto;
 import com.OnlineBankingService.entities.Client;
 import com.OnlineBankingService.entities.Status;
 import com.OnlineBankingService.repositories.ClientRepository;
@@ -15,12 +13,9 @@ import java.util.UUID;
 public class ClientService {
 
     private final ClientRepository clientRepository;
-    private final AuthClient authClient;
 
-    public ClientService(ClientRepository clientRepository,
-                         AuthClient authClient) {
+    public ClientService(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
-        this.authClient = authClient;
     }
 
     public List<Client> findAll() {
@@ -42,13 +37,7 @@ public class ClientService {
                 .orElseThrow(() -> new RuntimeException("Client not found"));
     }
 
-    public Client create(CreateClientDto dto, String token) {
-
-        TokenRequestDto request = new TokenRequestDto();
-        request.token = token;
-
-        authClient.validateEmployee(request);
-
+    public Client create(CreateClientDto dto) {
         Client client = new Client();
         client.id = UUID.randomUUID();
         client.name = dto.name;
@@ -59,10 +48,7 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
-    public Client update(UUID id, Client updated, String token) {
-
-        authClient.validateClientOrEmployee(token, id);
-
+    public Client update(UUID id, Client updated) {
         Client client = findById(id);
         client.login = updated.login;
         client.name = updated.name;
@@ -72,39 +58,19 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
-    public void delete(UUID id, String token) {
-
-        TokenRequestDto request = new TokenRequestDto();
-        request.token = token;
-
-        authClient.validateEmployee(request);
-
+    public void delete(UUID id) {
         clientRepository.deleteById(id);
     }
 
-    public Client lock(UUID id, String token) {
-
-        TokenRequestDto request = new TokenRequestDto();
-        request.token = token;
-
-        authClient.validateEmployee(request);
-
+    public Client lock(UUID id) {
         Client client = findById(id);
         client.status = Status.LOCKED;
-
         return clientRepository.save(client);
     }
 
-    public Client unlock(UUID id, String token) {
-
-        TokenRequestDto request = new TokenRequestDto();
-        request.token = token;
-
-        authClient.validateEmployee(request);
-
+    public Client unlock(UUID id) {
         Client client = findById(id);
         client.status = Status.UNLOCKED;
-
         return clientRepository.save(client);
     }
 
