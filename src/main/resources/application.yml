@@ -13,6 +13,11 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: MySuperSecretKeyThatIsLongEnough123456
 
 exchange-rate:
   api:
