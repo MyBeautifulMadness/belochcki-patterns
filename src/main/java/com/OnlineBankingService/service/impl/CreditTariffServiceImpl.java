@@ -34,21 +34,6 @@ public class CreditTariffServiceImpl implements CreditTariffService {
     @Override
     public CreditTariffResponse createCreditTariff (CreditTariffRequest request) {
 
-        AuthValidationRequest authValidationRequest = AuthValidationRequest.builder()
-                .token(request.getToken())
-                .build();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<AuthValidationRequest> entity = new HttpEntity<>(authValidationRequest, headers);
-
-        ResponseEntity<Boolean> response = restTemplateConfig.restTemplate().postForEntity("http://localhost:8085/api/auth/validate-employee", entity, Boolean.class);
-
-        if (!response.getStatusCode().is2xxSuccessful() || Boolean.FALSE.equals(response.getBody())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при проверке сотрудника");
-        }
-
         CreditTariff creditTariff = CreditTariff.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -71,20 +56,6 @@ public class CreditTariffServiceImpl implements CreditTariffService {
 
     @Override
     public void deleteCreditTariff (UUID id, DeleteCreditTariffRequest request){
-        AuthValidationRequest authValidationRequest = AuthValidationRequest.builder()
-                .token(request.getToken())
-                .build();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<AuthValidationRequest> entity = new HttpEntity<>(authValidationRequest, headers);
-
-        ResponseEntity<Boolean> response = restTemplateConfig.restTemplate().postForEntity("http://localhost:8085/api/auth/validate-employee", entity, Boolean.class);
-
-        if (!response.getStatusCode().is2xxSuccessful() || Boolean.FALSE.equals(response.getBody())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при проверке сотрудника");
-        }
 
         creditTariffRepository.deleteById(id);
     }
@@ -168,21 +139,6 @@ public class CreditTariffServiceImpl implements CreditTariffService {
 
     @Override
     public CreditTariffResponse updateCreditTariff(UUID id, CreditTariffRequest request){
-
-        AuthValidationRequest authValidationRequest = AuthValidationRequest.builder()
-                .token(request.getToken())
-                .build();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<AuthValidationRequest> entity = new HttpEntity<>(authValidationRequest, headers);
-
-        ResponseEntity<Boolean> response = restTemplateConfig.restTemplate().postForEntity("http://localhost:8085/api/auth/validate-employee", entity, Boolean.class);
-
-        if (!response.getStatusCode().is2xxSuccessful() || Boolean.FALSE.equals(response.getBody())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при проверке сотрудника");
-        }
 
         CreditTariff creditTariff = creditTariffRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Данного Кредитного тарифа не существует"));
 

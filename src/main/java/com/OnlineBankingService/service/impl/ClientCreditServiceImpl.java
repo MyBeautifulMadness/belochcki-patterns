@@ -4,10 +4,7 @@ import com.OnlineBankingService.config.RestTemplateConfig;
 import com.OnlineBankingService.entity.ClientCredit;
 import com.OnlineBankingService.entity.CreditOperationHistory;
 import com.OnlineBankingService.entity.CreditTariff;
-import com.OnlineBankingService.entity.dto.AuthValidationRequest;
-import com.OnlineBankingService.entity.dto.ClientCreditResponse;
-import com.OnlineBankingService.entity.dto.CreateClientCreditRequest;
-import com.OnlineBankingService.entity.dto.RepayCreditRequest;
+import com.OnlineBankingService.entity.dto.*;
 import com.OnlineBankingService.entity.enums.CreditStatus;
 import com.OnlineBankingService.entity.enums.OperationType;
 import com.OnlineBankingService.repository.ClientCreditRepository;
@@ -15,6 +12,7 @@ import com.OnlineBankingService.repository.CreditOperationHistoryRepository;
 import com.OnlineBankingService.repository.CreditTariffRepository;
 import com.OnlineBankingService.service.ClientCreditService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -43,22 +42,6 @@ public class ClientCreditServiceImpl implements ClientCreditService {
 
     @Override
     public ClientCreditResponse createClientCredit(CreateClientCreditRequest request){
-
-        AuthValidationRequest authValidationRequest = AuthValidationRequest.builder()
-                .token(request.getToken())
-                .clientId(request.getClientId())
-                .build();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<AuthValidationRequest> entity = new HttpEntity<>(authValidationRequest, headers);
-
-        ResponseEntity<Boolean> response = restTemplateConfig.restTemplate().postForEntity("http://localhost:8085/api/auth/validate-client", entity, Boolean.class);
-
-        if (!response.getStatusCode().is2xxSuccessful() || Boolean.FALSE.equals(response.getBody())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при проверке клиента");
-        }
 
         CreditTariff tariff = creditTariffRepository.findById(request.getCreditTariffId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Данный кредитный тариф не найден"));
 
@@ -207,19 +190,6 @@ public class ClientCreditServiceImpl implements ClientCreditService {
     @Override
     public List<ClientCreditResponse> getCurrentClientCredit(AuthValidationRequest request){
 
-        AuthValidationRequest authRequest = AuthValidationRequest.builder().token(request.getToken()).clientId(request.getClientId()).build();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<AuthValidationRequest> entity = new HttpEntity<>(authRequest, headers);
-
-        ResponseEntity<Boolean> response = restTemplateConfig.restTemplate().postForEntity("http://localhost:8085/api/auth/validate-client", entity, Boolean.class);
-
-        if (!response.getStatusCode().is2xxSuccessful() || Boolean.FALSE.equals(response.getBody())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при проверке клиента");
-        }
-
         return clientCreditRepository.findByClientId(request.getClientId())
                 .stream()
                 .map(credit -> ClientCreditResponse.builder()
@@ -240,18 +210,8 @@ public class ClientCreditServiceImpl implements ClientCreditService {
     @Override
     public void repayCredit(RepayCreditRequest request){
 
-        AuthValidationRequest authValidationRequest = AuthValidationRequest.builder().token(request.getToken()).clientId(request.getClientId()).build();
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<AuthValidationRequest> entity = new HttpEntity<>(authValidationRequest, headers);
-
-        ResponseEntity<Boolean> response = restTemplateConfig.restTemplate().postForEntity("http://localhost:8085/api/auth/validate-client", entity, Boolean.class);
-
-        if (!response.getStatusCode().is2xxSuccessful() || Boolean.FALSE.equals(response.getBody())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при проверке клиента");
-        }
 
         ClientCredit credit = clientCreditRepository.findById(request.getCreditId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Данный кредит не найден"));
 
@@ -275,11 +235,28 @@ public class ClientCreditServiceImpl implements ClientCreditService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка списания средств с дебетого счета");
         }
 
-        BigDecimal newDebt = credit.getDebtAmount().subtract(request.getAmount());
+        String currencyCode = getDebitAccountCurrencyCode(request.getClientId(), request.getDebitAccountId());
+        BigDecimal amountInRub = convertToRubles(request.getAmount(), currencyCode);
+
+        MoneyRequest masterDepositRequest = new MoneyRequest(amountInRub, "Пополнение master-account при погашении кредита " + request.getCreditId());
+
+        HttpEntity<MoneyRequest> masterDepositEntity = new HttpEntity<>(masterDepositRequest, headers);
+
+        ResponseEntity<Void> masterDepositResponse = restTemplateConfig.restTemplate().postForEntity(
+                "http://localhost:8081/api/core/master-account/internal/deposit",
+                masterDepositEntity,
+                Void.class
+        );
+
+        if (!masterDepositResponse.getStatusCode().is2xxSuccessful()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка пополнения master-счета");
+        }
+
+        BigDecimal newDebt = credit.getDebtAmount().subtract(amountInRub);
         credit.setLastPaymentDate(LocalDate.now());
         boolean creditJustClosed = false;
 
-        if (newDebt.compareTo(BigDecimal.ZERO) <= 0 ){
+        if (newDebt.compareTo(BigDecimal.ZERO) <= 0) {
             credit.setDebtAmount(BigDecimal.ZERO);
             credit.setCreditStatus(CreditStatus.CLOSED);
             creditJustClosed = true;
@@ -305,8 +282,8 @@ public class ClientCreditServiceImpl implements ClientCreditService {
                 .clientCreditId(credit)
                 .date(LocalDate.now())
                 .time(LocalTime.now())
-                .amount(request.getAmount())
-                .comment("Кредит " + credit.getId() + " пополнен на сумму " + request.getAmount())
+                .amount(amountInRub)
+                .comment("Кредит " + credit.getId() + " пополнен на сумму " + request.getAmount() + " " + currencyCode + " (" + amountInRub + " RUB)")
                 .operationType(OperationType.REPAYMENT)
                 .build();
 
@@ -325,6 +302,61 @@ public class ClientCreditServiceImpl implements ClientCreditService {
             }
         }
 
+    }
+
+
+
+
+
+    private String getDebitAccountCurrencyCode(UUID clientId, UUID debitAccountId) {
+        String url = "http://localhost:8081/api/core/clients/" + clientId + "/debit-accounts";
+
+        ResponseEntity<List<DebitAccountResponse>> response = restTemplateConfig.restTemplate().exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<DebitAccountResponse>>() {}
+        );
+
+        List<DebitAccountResponse> accounts = response.getBody();
+
+        if (accounts == null || accounts.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Дебетовые счета клиента не найдены");
+        }
+
+        return accounts.stream()
+                .filter(account -> debitAccountId.equals(account.getId()))
+                .map(DebitAccountResponse::getCurrencyCode)
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Дебетовый счет не найден"));
+    }
+
+    private BigDecimal convertToRubles(BigDecimal amount, String currencyCode) {
+        if (currencyCode == null || currencyCode.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не указан код валюты");
+        }
+
+        if ("RUB".equalsIgnoreCase(currencyCode)) {
+            return amount;
+        }
+
+        ResponseEntity<CbrRatesResponse> response = restTemplateConfig.restTemplate().getForEntity("https://www.cbr-xml-daily.ru/daily_json.js", CbrRatesResponse.class);
+
+        CbrRatesResponse body = response.getBody();
+
+        if (body == null || body.getValute() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось получить курсы валют");
+        }
+
+        CbrCurrencyRate rate = body.getValute().get(currencyCode.toUpperCase());
+
+        if (rate == null || rate.getValue() == null || rate.getNominal() == null || rate.getNominal() == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не найден курс для валюты " + currencyCode);
+        }
+
+        BigDecimal rubPerOneUnit = rate.getValue().divide(BigDecimal.valueOf(rate.getNominal()), 10, RoundingMode.HALF_UP);
+
+        return amount.multiply(rubPerOneUnit).setScale(2, RoundingMode.HALF_UP);
     }
 
 }
