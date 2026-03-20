@@ -28,7 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/core/admin/**").hasAuthority("SCOPE_EMPLOYEE")
                         .requestMatchers("/api/core/clients/**").hasAnyAuthority("SCOPE_CLIENT", "SCOPE_EMPLOYEE")
                         .requestMatchers("/api/core/credit-issued").hasAnyAuthority("SCOPE_CLIENT", "SCOPE_EMPLOYEE")
-                        .requestMatchers("/api/core/{clientId}/close").hasAnyAuthority("SCOPE_CLIENT", "SCOPE_EMPLOYEE")
+                        .requestMatchers("/api/core/*/close").hasAnyAuthority("SCOPE_CLIENT", "SCOPE_EMPLOYEE")
                         .requestMatchers("/api/core/currencies/**").hasAnyAuthority("SCOPE_CLIENT", "SCOPE_EMPLOYEE")
                         .requestMatchers("/api/core/master-account/**").hasAuthority("SCOPE_EMPLOYEE")
 

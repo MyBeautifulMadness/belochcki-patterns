@@ -52,3 +52,8 @@ CREATE TABLE master_account (
     currency_code VARCHAR(3) NOT NULL REFERENCES currency(code),
     status VARCHAR(16) NOT NULL
 );
+
+CREATE TABLE processed_command (
+    operation_id UUID PRIMARY KEY,
+    processed_at TIMESTAMP NOT NULL
+);

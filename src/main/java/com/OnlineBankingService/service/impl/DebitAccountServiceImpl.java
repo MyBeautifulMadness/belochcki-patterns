@@ -11,6 +11,9 @@ import com.OnlineBankingService.exception.ConflictException;
 import com.OnlineBankingService.exception.ForbiddenException;
 import com.OnlineBankingService.exception.NotFoundException;
 import com.OnlineBankingService.generator.AccountNameGenerator;
+import com.OnlineBankingService.kafka.command.DepositCommand;
+import com.OnlineBankingService.kafka.command.WithdrawCommand;
+import com.OnlineBankingService.kafka.command.TransferCommand;
 import com.OnlineBankingService.repository.AccountOperationRepository;
 import com.OnlineBankingService.repository.CreditAccountRepository;
 import com.OnlineBankingService.repository.DebitAccountRepository;
@@ -330,6 +333,40 @@ public class DebitAccountServiceImpl implements DebitAccountService {
                 fromAccount.getCurrencyCode(),
                 toAccount.getCurrencyCode(),
                 rate
+        );
+    }
+
+    @Override
+    @Transactional
+    public void processDepositCommand(DepositCommand command) {
+        deposit(
+                command.accountId(),
+                new MoneyRequest(command.amount(), command.comment()),
+                command.clientId()
+        );
+    }
+
+    @Override
+    @Transactional
+    public void processWithdrawCommand(WithdrawCommand command) {
+        withdraw(
+                command.accountId(),
+                new MoneyRequest(command.amount(), command.comment()),
+                command.clientId()
+        );
+    }
+
+    @Override
+    @Transactional
+    public void processTransferCommand(TransferCommand command) {
+        transfer(
+                command.clientId(),
+                new TransferRequest(
+                        command.fromAccountId(),
+                        command.toAccountId(),
+                        command.amount(),
+                        command.comment()
+                )
         );
     }
 
