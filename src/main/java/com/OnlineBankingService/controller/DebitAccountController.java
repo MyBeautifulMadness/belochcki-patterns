@@ -6,6 +6,8 @@ import com.OnlineBankingService.dto.*;
 import com.OnlineBankingService.kafka.command.DepositCommand;
 import com.OnlineBankingService.kafka.command.TransferCommand;
 import com.OnlineBankingService.kafka.command.WithdrawCommand;
+import com.OnlineBankingService.kafka.command.OpenDebitAccountCommand;
+import com.OnlineBankingService.kafka.command.CloseDebitAccountCommand;
 import com.OnlineBankingService.kafka.producer.AccountCommandProducer;
 import com.OnlineBankingService.service.DebitAccountService;
 import jakarta.validation.Valid;
@@ -31,8 +33,15 @@ public class DebitAccountController {
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts")
-    public DebitAccountResponse open(@PathVariable UUID clientId, @Valid @RequestBody OpenDebitAccountRequest request) {
-        return service.open(clientId, request);
+    public ResponseEntity<Void> open(@PathVariable UUID clientId, @Valid @RequestBody OpenDebitAccountRequest request) {
+        OpenDebitAccountCommand command = new OpenDebitAccountCommand(
+                UUID.randomUUID(),
+                clientId,
+                request.currencyCode()
+        );
+
+        accountCommandProducer.sendOpenDebitAccount(command);
+        return ResponseEntity.accepted().build();
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/deposit")
@@ -64,8 +73,15 @@ public class DebitAccountController {
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/close")
-    public DebitAccountResponse close(@PathVariable UUID clientId, @PathVariable UUID accountId) {
-        return service.close(accountId, clientId);
+    public ResponseEntity<Void> close(@PathVariable UUID clientId, @PathVariable UUID accountId) {
+        CloseDebitAccountCommand command = new CloseDebitAccountCommand(
+                UUID.randomUUID(),
+                clientId,
+                accountId
+        );
+
+        accountCommandProducer.sendCloseDebitAccount(command);
+        return ResponseEntity.accepted().build();
     }
 
     @GetMapping("/clients/{clientId}/debit-accounts")

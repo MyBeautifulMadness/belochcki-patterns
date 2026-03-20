@@ -14,6 +14,8 @@ import com.OnlineBankingService.generator.AccountNameGenerator;
 import com.OnlineBankingService.kafka.command.DepositCommand;
 import com.OnlineBankingService.kafka.command.WithdrawCommand;
 import com.OnlineBankingService.kafka.command.TransferCommand;
+import com.OnlineBankingService.kafka.command.OpenDebitAccountCommand;
+import com.OnlineBankingService.kafka.command.CloseDebitAccountCommand;
 import com.OnlineBankingService.repository.AccountOperationRepository;
 import com.OnlineBankingService.repository.CreditAccountRepository;
 import com.OnlineBankingService.repository.DebitAccountRepository;
@@ -138,7 +140,7 @@ public class DebitAccountServiceImpl implements DebitAccountService {
 
     @Override
     @Transactional
-    public DebitAccountResponse close(UUID accountId, UUID clientId) {
+    public DebitAccountResponse close(UUID clientId, UUID accountId) {
         UUID closedId = accountRepository.closeIfZeroBalance(accountId, clientId);
         if (closedId == null) {
             ensureAccountAccessible(clientId, accountId);
@@ -367,6 +369,24 @@ public class DebitAccountServiceImpl implements DebitAccountService {
                         command.amount(),
                         command.comment()
                 )
+        );
+    }
+
+    @Override
+    @Transactional
+    public void processOpenDebitAccountCommand(OpenDebitAccountCommand command) {
+        open(
+                command.clientId(),
+                new OpenDebitAccountRequest(command.currencyCode())
+        );
+    }
+
+    @Override
+    @Transactional
+    public void processCloseDebitAccountCommand(CloseDebitAccountCommand command) {
+        close(
+                command.clientId(),
+                command.accountId()
         );
     }
 

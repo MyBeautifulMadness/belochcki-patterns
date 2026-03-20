@@ -3,8 +3,7 @@ package com.OnlineBankingService.service;
 import com.OnlineBankingService.domain.AccountType;
 import com.OnlineBankingService.domain.Role;
 import com.OnlineBankingService.dto.*;
-import com.OnlineBankingService.kafka.command.DepositCommand;
-import com.OnlineBankingService.kafka.command.WithdrawCommand;
+import com.OnlineBankingService.kafka.command.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -18,7 +17,7 @@ public interface DebitAccountService {
 
     DebitAccountResponse withdraw(UUID accountId, MoneyRequest request, UUID clientId);
 
-    DebitAccountResponse close(UUID accountId, UUID clientId);
+    DebitAccountResponse close(UUID clientId, UUID accountId);
 
     List<DebitAccountResponse> getByClient(UUID clientId);
 
@@ -34,5 +33,9 @@ public interface DebitAccountService {
 
     void processWithdrawCommand(WithdrawCommand command);
 
-    void processTransferCommand(com.OnlineBankingService.kafka.command.TransferCommand command);
+    void processTransferCommand(TransferCommand command);
+
+    void processOpenDebitAccountCommand(OpenDebitAccountCommand command);
+
+    void processCloseDebitAccountCommand(CloseDebitAccountCommand command);
 }
