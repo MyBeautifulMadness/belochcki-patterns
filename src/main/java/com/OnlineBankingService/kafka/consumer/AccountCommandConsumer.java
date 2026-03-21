@@ -1,13 +1,10 @@
 package com.OnlineBankingService.kafka.consumer;
 
 import com.OnlineBankingService.entity.ProcessedCommand;
-import com.OnlineBankingService.kafka.command.DepositCommand;
-import com.OnlineBankingService.kafka.command.WithdrawCommand;
-import com.OnlineBankingService.kafka.command.TransferCommand;
-import com.OnlineBankingService.kafka.command.OpenDebitAccountCommand;
-import com.OnlineBankingService.kafka.command.CloseDebitAccountCommand;
+import com.OnlineBankingService.kafka.command.*;
 import com.OnlineBankingService.repository.ProcessedCommandRepository;
 import com.OnlineBankingService.service.DebitAccountService;
+import com.OnlineBankingService.service.MasterAccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -21,6 +18,7 @@ public class AccountCommandConsumer {
 
     private final DebitAccountService debitAccountService;
     private final ProcessedCommandRepository processedCommandRepository;
+    private final MasterAccountService masterAccountService;
 
     @KafkaListener(topics = "core.deposit-command", groupId = "core-service-group")
     @Transactional
@@ -98,6 +96,40 @@ public class AccountCommandConsumer {
         }
 
         debitAccountService.processCloseDebitAccountCommand(command);
+
+        processedCommandRepository.save(
+                ProcessedCommand.builder()
+                        .operationId(command.operationId())
+                        .processedAt(LocalDateTime.now())
+                        .build()
+        );
+    }
+
+    @KafkaListener(topics = "core.master-account-deposit-command", groupId = "core-service-group")
+    @Transactional
+    public void consumeMasterAccountDeposit(MasterAccountDepositCommand command) {
+        if (processedCommandRepository.existsById(command.operationId())) {
+            return;
+        }
+
+        masterAccountService.processDepositCommand(command);
+
+        processedCommandRepository.save(
+                ProcessedCommand.builder()
+                        .operationId(command.operationId())
+                        .processedAt(LocalDateTime.now())
+                        .build()
+        );
+    }
+
+    @KafkaListener(topics = "core.master-account-withdraw-command", groupId = "core-service-group")
+    @Transactional
+    public void consumeMasterAccountWithdraw(MasterAccountWithdrawCommand command) {
+        if (processedCommandRepository.existsById(command.operationId())) {
+            return;
+        }
+
+        masterAccountService.processWithdrawCommand(command);
 
         processedCommandRepository.save(
                 ProcessedCommand.builder()

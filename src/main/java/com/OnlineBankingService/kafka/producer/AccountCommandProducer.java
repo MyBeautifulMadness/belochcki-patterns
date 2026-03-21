@@ -1,10 +1,6 @@
 package com.OnlineBankingService.kafka.producer;
 
-import com.OnlineBankingService.kafka.command.DepositCommand;
-import com.OnlineBankingService.kafka.command.WithdrawCommand;
-import com.OnlineBankingService.kafka.command.TransferCommand;
-import com.OnlineBankingService.kafka.command.OpenDebitAccountCommand;
-import com.OnlineBankingService.kafka.command.CloseDebitAccountCommand;
+import com.OnlineBankingService.kafka.command.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -18,6 +14,8 @@ public class AccountCommandProducer {
     private static final String TRANSFER_TOPIC = "core.transfer-command";
     private static final String OPEN_DEBIT_TOPIC = "core.open-debit-account-command";
     private static final String CLOSE_DEBIT_TOPIC = "core.close-debit-account-command";
+    private static final String MASTER_DEPOSIT_TOPIC = "core.master-account-deposit-command";
+    private static final String MASTER_WITHDRAW_TOPIC = "core.master-account-withdraw-command";
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -39,5 +37,17 @@ public class AccountCommandProducer {
 
     public void sendCloseDebitAccount(CloseDebitAccountCommand command) {
         kafkaTemplate.send(CLOSE_DEBIT_TOPIC, command.operationId().toString(), command);
+    }
+
+    public void sendMasterAccountDeposit(MasterAccountDepositCommand command) {
+        kafkaTemplate.send(
+                MASTER_DEPOSIT_TOPIC, command.operationId().toString(), command
+        );
+    }
+
+    public void sendMasterAccountWithdraw(MasterAccountWithdrawCommand command) {
+        kafkaTemplate.send(
+                MASTER_WITHDRAW_TOPIC, command.operationId().toString(), command
+        );
     }
 }

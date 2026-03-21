@@ -8,6 +8,8 @@ import com.OnlineBankingService.domain.OperationType;
 import com.OnlineBankingService.exception.ConflictException;
 import com.OnlineBankingService.exception.NotFoundException;
 import com.OnlineBankingService.generator.AccountNameGenerator;
+import com.OnlineBankingService.kafka.command.MasterAccountDepositCommand;
+import com.OnlineBankingService.kafka.command.MasterAccountWithdrawCommand;
 import com.OnlineBankingService.repository.AccountOperationRepository;
 import com.OnlineBankingService.repository.MasterAccountRepository;
 import com.OnlineBankingService.service.MasterAccountService;
@@ -147,6 +149,18 @@ public class MasterAccountServiceImpl implements MasterAccountService {
         return masterAccountRepository.findSingleMasterAccount()
                 .map(MasterAccount::getId)
                 .orElseThrow(() -> new NotFoundException("Master account not found"));
+    }
+
+    @Override
+    @Transactional
+    public void processDepositCommand(MasterAccountDepositCommand command) {
+        deposit(command.amount());
+    }
+
+    @Override
+    @Transactional
+    public void processWithdrawCommand(MasterAccountWithdrawCommand command) {
+        withdraw(command.amount());
     }
 
     private String generateUniqueName() {
