@@ -48,12 +48,12 @@ public class EmployeeController {
         employeeClient.delete(id, authorization);
     }
 
-    @PatchMapping("/{id}/lock")
+    @PutMapping("/{id}/lock")
     public Employee lock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
         return employeeClient.lock(id, token);
     }
 
-    @PatchMapping("/{id}/unlock")
+    @PutMapping("/{id}/unlock")
     public Employee unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token) {
         return employeeClient.unlock(id, token);
     }

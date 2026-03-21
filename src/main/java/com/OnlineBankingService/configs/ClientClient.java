@@ -26,10 +26,10 @@ public interface ClientClient {
     @DeleteMapping("/{id}")
     void delete(@RequestHeader("Authorization") String authorization, @PathVariable UUID id);
 
-    @PatchMapping("/{id}/lock")
+    @PutMapping("/{id}/lock")
     Client lock(@PathVariable UUID id, @RequestHeader("Authorization") String token);
 
-    @PatchMapping("/{id}/unlock")
+    @PutMapping("/{id}/unlock")
     Client unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token);
 
     @GetMapping("/credit-rating")

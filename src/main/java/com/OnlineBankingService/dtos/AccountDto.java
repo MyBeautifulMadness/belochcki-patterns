@@ -14,7 +14,7 @@ public record AccountDto(
         LocalTime createdTime,
         BigDecimal balance,
         String name,
-        String currencyCode,
+        String CurrencyCode,
         AccountStatus status
 ) {
 }

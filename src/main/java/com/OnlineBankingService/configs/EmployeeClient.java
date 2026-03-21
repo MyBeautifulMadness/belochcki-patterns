@@ -28,10 +28,10 @@ public interface EmployeeClient {
     @DeleteMapping("/{id}")
     void delete(@PathVariable UUID id, @RequestHeader("Authorization") String authorization);
 
-    @PatchMapping("/{id}/lock")
+    @PutMapping("/{id}/lock")
     Employee lock(@PathVariable UUID id, @RequestHeader("Authorization") String token);
 
-    @PatchMapping("/{id}/unlock")
+    @PutMapping("/{id}/unlock")
     Employee unlock(@PathVariable UUID id, @RequestHeader("Authorization") String token);
 
     @GetMapping("/token")
