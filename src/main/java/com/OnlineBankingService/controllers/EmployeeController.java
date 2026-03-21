@@ -52,13 +52,13 @@ public class EmployeeController {
     }
 
     @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
-    @PatchMapping("/{id}/lock")
+    @PutMapping("/{id}/lock")
     public Employee lock(@PathVariable UUID id) {
         return employeeService.lock(id);
     }
 
     @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
-    @PatchMapping("/{id}/unlock")
+    @PutMapping("/{id}/unlock")
     public Employee unlock(@PathVariable UUID id) {
         return employeeService.unlock(id);
     }

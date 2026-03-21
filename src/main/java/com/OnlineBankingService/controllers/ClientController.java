@@ -49,13 +49,13 @@ public class ClientController {
     }
 
     @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
-    @PatchMapping("/{id}/lock")
+    @PutMapping("/{id}/lock")
     public Client lock(@PathVariable UUID id) {
         return clientService.lock(id);
     }
 
     @PreAuthorize("hasAuthority('SCOPE_EMPLOYEE')")
-    @PatchMapping("/{id}/unlock")
+    @PutMapping("/{id}/unlock")
     public Client unlock(@PathVariable UUID id) {
         return clientService.unlock(id);
     }

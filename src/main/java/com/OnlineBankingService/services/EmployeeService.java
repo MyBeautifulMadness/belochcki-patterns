@@ -1,8 +1,11 @@
 package com.OnlineBankingService.services;
 
+import com.OnlineBankingService.configs.CreditClient;
 import com.OnlineBankingService.dtos.CreateEmployeeDto;
+import com.OnlineBankingService.dtos.CreateUserSettingsDtoRequest;
 import com.OnlineBankingService.entities.Employee;
 import com.OnlineBankingService.entities.Status;
+import com.OnlineBankingService.entities.Theme;
 import com.OnlineBankingService.repositories.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +16,11 @@ import java.util.UUID;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final CreditClient Crclient;
 
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    public EmployeeService(EmployeeRepository employeeRepository, CreditClient client) {
         this.employeeRepository = employeeRepository;
+        this.Crclient= client;
     }
 
     public List<Employee> findAll() {
@@ -44,6 +49,11 @@ public class EmployeeService {
         employee.login = dto.login;
         employee.password = dto.password;
         employee.status = Status.UNLOCKED;
+
+        CreateUserSettingsDtoRequest request = new CreateUserSettingsDtoRequest();
+        request.setUserId(employee.id);
+        request.setTheme(Theme.LIGHT);
+        Crclient.create(request);
 
         return employeeRepository.save(employee);
     }
