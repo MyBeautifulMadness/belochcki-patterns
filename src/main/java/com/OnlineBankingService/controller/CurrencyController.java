@@ -26,7 +26,7 @@ public class CurrencyController {
         return currencyService.create(request);
     }
 
-    @PatchMapping("/{code}/deactivate")
+    @PutMapping("/{code}/deactivate")
     public CurrencyResponse deactivate(@PathVariable String code) {
         return currencyService.deactivate(code);
     }
