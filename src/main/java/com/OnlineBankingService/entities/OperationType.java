@@ -6,5 +6,8 @@ public enum OperationType {
     WITHDRAW,
     CLOSE,
 
-    CREDIT_SERVICE_WITHDRAW
+    CREDIT_SERVICE_WITHDRAW,
+
+    TRANSFER_OUT,
+    TRANSFER_IN
 }
