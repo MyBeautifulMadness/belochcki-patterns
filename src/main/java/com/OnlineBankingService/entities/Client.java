@@ -15,5 +15,6 @@ public class Client {
 
     @Enumerated(EnumType.STRING)
     public Status status;
+    public Integer creditRating;
     public String token;
 }
