@@ -22,6 +22,7 @@ import com.OnlineBankingService.repository.DebitAccountRepository;
 import com.OnlineBankingService.service.CurrencyService;
 import com.OnlineBankingService.service.DebitAccountService;
 import com.OnlineBankingService.service.ExchangeRateService;
+import com.OnlineBankingService.service.ws.AccountOperationWsPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,7 @@ public class DebitAccountServiceImpl implements DebitAccountService {
     private final AccountNameGenerator nameGenerator;
     private final CurrencyService currencyService;
     private final ExchangeRateService exchangeRateService;
+    private final AccountOperationWsPublisher wsPublisher;
 
     @Override
     @Transactional
@@ -173,6 +175,8 @@ public class DebitAccountServiceImpl implements DebitAccountService {
                 .comment(comment)
                 .operationType(type)
                 .build());
+
+        wsPublisher.notifyAccountOperationsChanged(accountId);
     }
 
 

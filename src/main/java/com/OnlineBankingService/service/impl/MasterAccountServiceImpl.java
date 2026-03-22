@@ -13,6 +13,7 @@ import com.OnlineBankingService.kafka.command.MasterAccountWithdrawCommand;
 import com.OnlineBankingService.repository.AccountOperationRepository;
 import com.OnlineBankingService.repository.MasterAccountRepository;
 import com.OnlineBankingService.service.MasterAccountService;
+import com.OnlineBankingService.service.ws.AccountOperationWsPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class MasterAccountServiceImpl implements MasterAccountService {
     private final MasterAccountRepository masterAccountRepository;
     private final AccountOperationRepository operationRepository;
     private final AccountNameGenerator nameGenerator;
+    private final AccountOperationWsPublisher wsPublisher;
 
     @Override
     @Transactional
@@ -185,6 +187,8 @@ public class MasterAccountServiceImpl implements MasterAccountService {
                 .comment(comment)
                 .operationType(type)
                 .build());
+
+        wsPublisher.notifyAccountOperationsChanged(accountId);
     }
 
     private MasterAccountResponse toResponse(MasterAccount a) {

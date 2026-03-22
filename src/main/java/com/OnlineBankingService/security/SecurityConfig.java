@@ -23,6 +23,7 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
 
+                        .requestMatchers("/ws/**", "/ws").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
 
                         .requestMatchers("/api/core/admin/**").hasAuthority("SCOPE_EMPLOYEE")
