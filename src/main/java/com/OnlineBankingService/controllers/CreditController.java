@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("http://localhost:8084/api")
+@RequestMapping("/api")
 public class CreditController {
 
 
