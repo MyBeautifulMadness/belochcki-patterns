@@ -64,7 +64,7 @@ public interface CoreClient {
     @PostMapping("/currencies")
     CurrencyResponse create(@Valid @RequestBody CreateCurrencyRequest request);
 
-    @PatchMapping("/currencies/{code}/deactivate")
+    @PutMapping("/currencies/{code}/deactivate")
     CurrencyResponse deactivate(@PathVariable String code);
 
     @PostMapping("/master-account")

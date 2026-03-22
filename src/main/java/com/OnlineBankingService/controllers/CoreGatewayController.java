@@ -150,7 +150,7 @@ public class CoreGatewayController {
         return gatewayService.create(request);
     }
 
-    @PatchMapping("/currencies/{code}/deactivate")
+    @PutMapping("/currencies/{code}/deactivate")
     CurrencyResponse deactivate(@PathVariable String code){
         return gatewayService.deactivate(code);
     }
