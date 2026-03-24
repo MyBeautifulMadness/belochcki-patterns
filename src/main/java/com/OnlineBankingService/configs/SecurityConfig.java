@@ -22,6 +22,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/clients/login").permitAll()
                         .requestMatchers("/api/employees/test").permitAll()
                         .requestMatchers("/api/employees/**").hasAuthority("SCOPE_EMPLOYEE")
+                        .requestMatchers("/api/clients/credit-rating").permitAll()
                         .requestMatchers("/api/clients/**").hasAnyAuthority("SCOPE_CLIENT", "SCOPE_EMPLOYEE")
                         .anyRequest().authenticated()
                 )

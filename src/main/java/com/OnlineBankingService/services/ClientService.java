@@ -92,8 +92,7 @@ public class ClientService {
     public Integer updateCreditRating(UUID userId, Integer newValue) {
         Client user = clientRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Client not found"));
-
-        user.setCreditRating(newValue);
+        user.setCreditRating(user.getCreditRating() + newValue);
         clientRepository.save(user);
 
         return newValue;
