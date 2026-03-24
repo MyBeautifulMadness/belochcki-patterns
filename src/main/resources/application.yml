@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/creditdb
     username: postgres
-    password: V
+    password: 123
   jpa:
     hibernate:
       ddl-auto: update

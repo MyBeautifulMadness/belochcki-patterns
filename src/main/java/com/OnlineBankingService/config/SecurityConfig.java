@@ -41,7 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/clientCredit/repay").hasAnyAuthority("SCOPE_CLIENT")
                         .requestMatchers("/api/clientCredit/create").hasAnyAuthority("SCOPE_CLIENT")
                         .requestMatchers("/api/clientCredit/getById/**").permitAll()
-                        .requestMatchers("/api/clientCredit/getAll").hasAnyAuthority("SCOPE_EMPLOYEE")
+                        .requestMatchers("/api/clientCredit/getAll").permitAll()
 
                         //Credit Operation History Controller
                         .requestMatchers("/api/creditOperationHistory/getAll").permitAll()

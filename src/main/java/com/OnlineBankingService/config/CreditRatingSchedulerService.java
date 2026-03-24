@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +35,7 @@ public class CreditRatingSchedulerService {
 
     private static final String UPDATE_CREDIT_RATING_URL = "http://localhost:8082/api/clients/credit-rating";
 
-    @Scheduled(fixedRate = 3600000) //60000
+    @Scheduled(fixedRate = 60000) //60000
     @Transactional
     public void updateClientCreditRatings(){
 
@@ -64,9 +65,10 @@ public class CreditRatingSchedulerService {
             try {
                 UUID clientCreditId = history.getClientCreditId();
                 LocalDate operationDate = history.getDate();
+                LocalTime operationTime = history.getTime();
 
-                if (clientCreditId == null || operationDate == null) {
-                    log.warn("История historyId={} пропущена, потому что значение clientCreditId или даты null", history.getId());
+                if (clientCreditId == null || operationDate == null || operationTime == null) {
+                    log.warn("История historyId={} пропущена, потому что значение clientCreditId или даты/времени null", history.getId());
                     continue;
                 }
 
@@ -84,8 +86,10 @@ public class CreditRatingSchedulerService {
                     continue;
                 }
 
-                long daysBetween = ChronoUnit.DAYS.between(operationDate, LocalDate.now());
-                int ratingValue = daysBetween >= 30 ? -10 : 10;
+                LocalDateTime operationDateTime = LocalDateTime.of(operationDate, operationTime);
+
+                long minutesBetween = ChronoUnit.MINUTES.between(operationDateTime, LocalDateTime.now());
+                int ratingValue = minutesBetween >= 1 ? -10 : 10;
 
                 UpdateCreditRatingRequest request = UpdateCreditRatingRequest.builder()
                         .userId(clientId)

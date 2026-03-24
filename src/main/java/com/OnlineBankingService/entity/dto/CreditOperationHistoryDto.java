@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Data
@@ -20,4 +21,5 @@ public class CreditOperationHistoryDto {
     private UUID clientCreditId;
     private OperationType operationType;
     private LocalDate date;
+    private LocalTime  time;
 }

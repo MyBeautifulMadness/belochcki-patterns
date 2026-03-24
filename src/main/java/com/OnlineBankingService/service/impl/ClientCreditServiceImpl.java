@@ -11,7 +11,10 @@ import com.OnlineBankingService.repository.ClientCreditRepository;
 import com.OnlineBankingService.repository.CreditOperationHistoryRepository;
 import com.OnlineBankingService.repository.CreditTariffRepository;
 import com.OnlineBankingService.service.ClientCreditService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +23,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -31,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClientCreditServiceImpl implements ClientCreditService {
@@ -41,15 +47,14 @@ public class ClientCreditServiceImpl implements ClientCreditService {
     private final CreditOperationHistoryRepository creditOperationHistoryRepository;
 
     @Override
+    @Transactional
     public ClientCreditResponse createClientCredit(CreateClientCreditRequest request){
-
         CreditTariff tariff = creditTariffRepository.findById(request.getCreditTariffId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Данный кредитный тариф не найден"));
 
         BigDecimal amount = request.getCreditAmount();
         if (amount.compareTo(tariff.getAmountFrom()) < 0 || amount.compareTo(tariff.getAmountTo()) > 0){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Указанная сумма кредита не входит в диапазон выбранного тарифа");
         }
-
         ClientCredit credit = ClientCredit.builder()
                 .creditTariffId(tariff)
                 .clientId(request.getClientId())
@@ -62,10 +67,9 @@ public class ClientCreditServiceImpl implements ClientCreditService {
                 .build();
 
         ClientCredit result = clientCreditRepository.save(credit);
-
         Map<String, Object> creditIssueBody = Map.of("clientId", request.getClientId(), "amount", result.getCreditAmount(), "comment", "Создание кредитного счета");
-        ResponseEntity<Void> creditIssueResponse = restTemplateConfig.restTemplate().postForEntity("http://localhost:8081/api/core/credit-issued", creditIssueBody, Void.class);
 
+        ResponseEntity<Void> creditIssueResponse = restTemplateConfig.restTemplate().postForEntity("http://localhost:8081/api/core/credit-issued", creditIssueBody, Void.class);
         if (!creditIssueResponse.getStatusCode().is2xxSuccessful()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при создании кредитного счета");
         }
@@ -304,31 +308,23 @@ public class ClientCreditServiceImpl implements ClientCreditService {
 
     }
 
-
-
-
-
     private String getDebitAccountCurrencyCode(UUID clientId, UUID debitAccountId) {
-        String url = "http://localhost:8081/api/core/clients/" + clientId + "/debit-accounts";
+        String url = "http://localhost:8081/api/core/clients/" + clientId + "/debit-accounts/" + debitAccountId + "?role=CLIENT";
 
-        ResponseEntity<List<DebitAccountResponse>> response = restTemplateConfig.restTemplate().exchange(
+        ResponseEntity<DebitAccountResponse> response = restTemplateConfig.restTemplate().exchange(
                 url,
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<DebitAccountResponse>>() {}
+                DebitAccountResponse.class
         );
 
-        List<DebitAccountResponse> accounts = response.getBody();
+        DebitAccountResponse account = response.getBody();
 
-        if (accounts == null || accounts.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Дебетовые счета клиента не найдены");
+        if (account == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Дебетовый счет не найден");
         }
 
-        return accounts.stream()
-                .filter(account -> debitAccountId.equals(account.getId()))
-                .map(DebitAccountResponse::getCurrencyCode)
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Дебетовый счет не найден"));
+        return account.getCurrencyCode();
     }
 
     private BigDecimal convertToRubles(BigDecimal amount, String currencyCode) {
@@ -340,23 +336,39 @@ public class ClientCreditServiceImpl implements ClientCreditService {
             return amount;
         }
 
-        ResponseEntity<CbrRatesResponse> response = restTemplateConfig.restTemplate().getForEntity("https://www.cbr-xml-daily.ru/daily_json.js", CbrRatesResponse.class);
+        try {
+            ResponseEntity<String> response = restTemplateConfig.restTemplate().getForEntity(
+                    "https://www.cbr-xml-daily.ru/daily_json.js",
+                    String.class
+            );
 
-        CbrRatesResponse body = response.getBody();
+            String json = response.getBody();
 
-        if (body == null || body.getValute() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось получить курсы валют");
+            if (json == null || json.isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось получить курсы валют");
+            }
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            CbrRatesResponse body = objectMapper.readValue(json, CbrRatesResponse.class);
+
+            if (body.getValute() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось получить курсы валют");
+            }
+
+            CbrCurrencyRate rate = body.getValute().get(currencyCode.toUpperCase());
+
+            if (rate == null || rate.getValue() == null || rate.getNominal() == null || rate.getNominal() == 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не найден курс для валюты " + currencyCode);
+            }
+
+            BigDecimal rubPerOneUnit = rate.getValue()
+                    .divide(BigDecimal.valueOf(rate.getNominal()), 10, RoundingMode.HALF_UP);
+
+            return amount.multiply(rubPerOneUnit).setScale(2, RoundingMode.HALF_UP);
+
+        } catch (RestClientException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при обращении к сервису курсов валют");
         }
-
-        CbrCurrencyRate rate = body.getValute().get(currencyCode.toUpperCase());
-
-        if (rate == null || rate.getValue() == null || rate.getNominal() == null || rate.getNominal() == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не найден курс для валюты " + currencyCode);
-        }
-
-        BigDecimal rubPerOneUnit = rate.getValue().divide(BigDecimal.valueOf(rate.getNominal()), 10, RoundingMode.HALF_UP);
-
-        return amount.multiply(rubPerOneUnit).setScale(2, RoundingMode.HALF_UP);
     }
 
 }
