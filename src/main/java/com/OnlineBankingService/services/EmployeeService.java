@@ -7,7 +7,9 @@ import com.OnlineBankingService.entities.Employee;
 import com.OnlineBankingService.entities.Status;
 import com.OnlineBankingService.entities.Theme;
 import com.OnlineBankingService.repositories.EmployeeRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +22,7 @@ public class EmployeeService {
 
     public EmployeeService(EmployeeRepository employeeRepository, CreditClient client) {
         this.employeeRepository = employeeRepository;
-        this.Crclient= client;
+        this.Crclient = client;
     }
 
     public List<Employee> findAll() {
@@ -29,17 +31,17 @@ public class EmployeeService {
 
     public Employee findById(UUID id) {
         return employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
     }
 
     public Employee findByLogin(String login) {
         return employeeRepository.findByLogin(login)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
     }
 
     public Employee findByToken(String token) {
         return employeeRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
     }
 
     public Employee create(CreateEmployeeDto dto) {
@@ -53,6 +55,7 @@ public class EmployeeService {
         CreateUserSettingsDtoRequest request = new CreateUserSettingsDtoRequest();
         request.setUserId(employee.id);
         request.setTheme(Theme.LIGHT);
+
         Crclient.create(request);
 
         return employeeRepository.save(employee);
@@ -65,11 +68,13 @@ public class EmployeeService {
         employee.login = dto.login;
         employee.password = dto.password;
         employee.status = Status.UNLOCKED;
+
         return employeeRepository.save(employee);
     }
 
     public Employee update(UUID id, Employee updated) {
         Employee employee = findById(id);
+
         employee.login = updated.login;
         employee.name = updated.name;
         employee.password = updated.password;

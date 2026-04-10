@@ -7,7 +7,9 @@ import com.OnlineBankingService.entities.Client;
 import com.OnlineBankingService.entities.Status;
 import com.OnlineBankingService.entities.Theme;
 import com.OnlineBankingService.repositories.ClientRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,17 +31,17 @@ public class ClientService {
 
     public Client findById(UUID id) {
         return clientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
     }
 
     public Client findByLogin(String login) {
         return clientRepository.findByLogin(login)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
     }
 
     public Client findByToken(String token) {
         return clientRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
     }
 
     public Client create(CreateClientDto dto) {
@@ -53,12 +55,15 @@ public class ClientService {
         CreateUserSettingsDtoRequest request = new CreateUserSettingsDtoRequest();
         request.setUserId(client.id);
         request.setTheme(Theme.LIGHT);
+
         Crclient.create(request);
+
         return clientRepository.save(client);
     }
 
     public Client update(UUID id, Client updated) {
         Client client = findById(id);
+
         client.login = updated.login;
         client.name = updated.name;
         client.password = updated.password;
@@ -86,12 +91,13 @@ public class ClientService {
     public Integer getCreditRating(UUID userId) {
         return clientRepository.findById(userId)
                 .map(Client::getCreditRating)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
     }
 
     public Integer updateCreditRating(UUID userId, Integer newValue) {
         Client user = clientRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
+
         user.setCreditRating(user.getCreditRating() + newValue);
         clientRepository.save(user);
 

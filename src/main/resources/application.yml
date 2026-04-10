@@ -16,6 +16,9 @@ spring:
       resourceserver:
         jwt:
           secret-key: MySuperSecretKeyThatIsLongEnough123456
+  server:
+    error:
+      include-message: always
 
 server:
   port: 8082 #изменить на свой сервис: credit service(8084), info service(8085), core(8081)
