@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@FeignClient(name = "credit-service", url = "http://localhost:8084/api")
+@FeignClient(name = "credit-service", url = "http://localhost:8084/api",configuration = FeignConfig.class)
 public interface CreditClient {
 
     @PostMapping("/clientCredit/create")

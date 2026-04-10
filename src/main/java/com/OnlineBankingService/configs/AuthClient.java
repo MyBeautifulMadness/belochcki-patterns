@@ -8,7 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "auth-service", url = "http://localhost:8083/api/auth")
+@FeignClient(name = "auth-service", url = "http://localhost:8083/api/auth",configuration = FeignConfig.class)
 public interface AuthClient {
 
     @PostMapping("/login")

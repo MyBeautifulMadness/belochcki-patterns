@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "core-service", url = "http://localhost:8081/api/core")
+@FeignClient(name = "core-service", url = "http://localhost:8081/api/core",configuration = FeignConfig.class)
 public interface CoreClient {
 
     @PostMapping("/clients/{clientId}/debit-accounts")
