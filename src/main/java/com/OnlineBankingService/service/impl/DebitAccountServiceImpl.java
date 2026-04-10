@@ -78,6 +78,8 @@ public class DebitAccountServiceImpl implements DebitAccountService {
                 .operationType(OperationType.OPEN)
                 .build());
 
+        wsPublisher.notifyAccountOperationsChanged(account.getId());
+
         return toResponse(account);
     }
 
