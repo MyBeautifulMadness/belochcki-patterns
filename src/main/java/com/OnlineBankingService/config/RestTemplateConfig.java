@@ -10,6 +10,13 @@ public class RestTemplateConfig {
 
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        RestTemplate restTemplate = new RestTemplate();
+
+        restTemplate.getInterceptors().add((request, body, execution) -> {
+            request.getHeaders().add("X-Internal-Call", "true");
+            return execution.execute(request, body);
+        });
+
+        return restTemplate;
     }
 }

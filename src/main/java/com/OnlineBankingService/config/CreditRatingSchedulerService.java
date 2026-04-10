@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CreditRatingSchedulerService {
 
-    private final RestTemplateConfig restTemplateConfig;
+    private final RestTemplate restTemplateConfig;
 
     private static final String CREDIT_OPERATION_HISTORY_URL = "http://localhost:8084/api/creditOperationHistory/getAll?operationType=REPAYMENT&direction=asc&page=0&size=1000";
 
@@ -41,7 +42,7 @@ public class CreditRatingSchedulerService {
 
         log.info("Началось обновление кредитных рейтингов");
 
-        ResponseEntity<CreditOperationHistoryPageResponse> historyResponse = restTemplateConfig.restTemplate().getForEntity(CREDIT_OPERATION_HISTORY_URL, CreditOperationHistoryPageResponse.class);
+        ResponseEntity<CreditOperationHistoryPageResponse> historyResponse = restTemplateConfig.getForEntity(CREDIT_OPERATION_HISTORY_URL, CreditOperationHistoryPageResponse.class);
 
         List<CreditOperationHistoryDto> histories = historyResponse.getBody() != null ? historyResponse.getBody().getData() : Collections.emptyList();
 
@@ -50,7 +51,7 @@ public class CreditRatingSchedulerService {
             return;
         }
 
-        ResponseEntity<ClientCreditPageResponse> clientCreditResponse = restTemplateConfig.restTemplate().getForEntity(CLIENT_CREDIT_URL, ClientCreditPageResponse.class);
+        ResponseEntity<ClientCreditPageResponse> clientCreditResponse = restTemplateConfig.getForEntity(CLIENT_CREDIT_URL, ClientCreditPageResponse.class);
 
         List<ClientCreditDto> clientCredits = clientCreditResponse.getBody() != null ? clientCreditResponse.getBody().getData() : Collections.emptyList();
 
@@ -101,7 +102,7 @@ public class CreditRatingSchedulerService {
 
                 HttpEntity<UpdateCreditRatingRequest> entity = new HttpEntity<>(request, headers);
 
-                restTemplateConfig.restTemplate().put(UPDATE_CREDIT_RATING_URL, entity);
+                restTemplateConfig.put(UPDATE_CREDIT_RATING_URL, entity);
 
                 log.info("Кредитный рейтинг обновлен для ClientID={}, рейтинг={}", clientId, ratingValue);
 

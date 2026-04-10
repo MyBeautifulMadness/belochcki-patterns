@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -23,14 +24,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ClientCreditRatingServiceImpl implements ClientCreditRatingService {
 
-    private final RestTemplateConfig restTemplateConfig;
+    private final RestTemplate restTemplateConfig;
     private final CreditOperationHistoryRepository creditOperationHistoryRepository;
 
     @Override
     public Integer getClientCreditRating(UUID clientId) {
         String url = "http://localhost:8082/api/clients/credit-rating?id=" + clientId;
 
-        ResponseEntity<Integer> response = restTemplateConfig.restTemplate().getForEntity(url, Integer.class);
+        ResponseEntity<Integer> response = restTemplateConfig.getForEntity(url, Integer.class);
 
         return response.getBody();
     }

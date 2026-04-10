@@ -24,6 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -43,7 +44,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
 
     private final ClientCreditRepository clientCreditRepository;
     private final CreditTariffRepository creditTariffRepository;
-    private final RestTemplateConfig restTemplateConfig;
+    private final RestTemplate restTemplateConfig;
     private final CreditOperationHistoryRepository creditOperationHistoryRepository;
 
     @Override
@@ -69,7 +70,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
         ClientCredit result = clientCreditRepository.save(credit);
         Map<String, Object> creditIssueBody = Map.of("clientId", request.getClientId(), "amount", result.getCreditAmount(), "comment", "Создание кредитного счета");
 
-        ResponseEntity<Void> creditIssueResponse = restTemplateConfig.restTemplate().postForEntity("http://localhost:8081/api/core/credit-issued", creditIssueBody, Void.class);
+        ResponseEntity<Void> creditIssueResponse = restTemplateConfig.postForEntity("http://localhost:8081/api/core/credit-issued", creditIssueBody, Void.class);
         if (!creditIssueResponse.getStatusCode().is2xxSuccessful()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка при создании кредитного счета");
         }
@@ -233,7 +234,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
 
         Map<String, Object> withdrawBody = Map.of("amount", request.getAmount(), "comment", "Погашение кредита " + request.getCreditId());
 
-        ResponseEntity<Void> withdrawResponse  = restTemplateConfig.restTemplate().postForEntity("http://localhost:8081/api/core/clients/" + request.getClientId() + "/debit-accounts/" + request.getDebitAccountId() + "/withdraw", withdrawBody, Void.class);
+        ResponseEntity<Void> withdrawResponse  = restTemplateConfig.postForEntity("http://localhost:8081/api/core/clients/" + request.getClientId() + "/debit-accounts/" + request.getDebitAccountId() + "/withdraw", withdrawBody, Void.class);
 
         if (!withdrawResponse.getStatusCode().is2xxSuccessful()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка списания средств с дебетого счета");
@@ -246,7 +247,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
 
         HttpEntity<MoneyRequest> masterDepositEntity = new HttpEntity<>(masterDepositRequest, headers);
 
-        ResponseEntity<Void> masterDepositResponse = restTemplateConfig.restTemplate().postForEntity(
+        ResponseEntity<Void> masterDepositResponse = restTemplateConfig.postForEntity(
                 "http://localhost:8081/api/core/master-account/internal/deposit",
                 masterDepositEntity,
                 Void.class
@@ -297,7 +298,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
             boolean hasOpenCredits = clientCreditRepository.existsByClientIdAndCreditStatus(request.getClientId(), CreditStatus.OPEN);
 
             if (!hasOpenCredits) {
-                ResponseEntity<Void> closeCreditAccountResponse = restTemplateConfig.restTemplate()
+                ResponseEntity<Void> closeCreditAccountResponse = restTemplateConfig
                         .postForEntity(
                                 "http://localhost:8081/api/core/" + request.getClientId() + "/close",
                                 null,
@@ -311,7 +312,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
     private String getDebitAccountCurrencyCode(UUID clientId, UUID debitAccountId) {
         String url = "http://localhost:8081/api/core/clients/" + clientId + "/debit-accounts/" + debitAccountId + "?role=CLIENT";
 
-        ResponseEntity<DebitAccountResponse> response = restTemplateConfig.restTemplate().exchange(
+        ResponseEntity<DebitAccountResponse> response = restTemplateConfig.exchange(
                 url,
                 HttpMethod.GET,
                 null,
@@ -337,7 +338,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
         }
 
         try {
-            ResponseEntity<String> response = restTemplateConfig.restTemplate().getForEntity(
+            ResponseEntity<String> response = restTemplateConfig.getForEntity(
                     "https://www.cbr-xml-daily.ru/daily_json.js",
                     String.class
             );
