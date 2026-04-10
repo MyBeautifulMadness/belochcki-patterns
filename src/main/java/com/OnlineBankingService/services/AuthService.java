@@ -6,7 +6,9 @@ import com.OnlineBankingService.dtos.AuthResponseDto;
 import com.OnlineBankingService.entities.Client;
 import com.OnlineBankingService.entities.Employee;
 import com.OnlineBankingService.entities.Status;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,40 +32,46 @@ public class AuthService {
         List<String> roles = new ArrayList<>();
         UUID userId = null;
 
+        Employee employee = null;
+        Client client = null;
+
         try {
-            System.out.println("Calling employee service...");
-            Employee employee = userFeignClient.getEmployeeByLogin(dto.login);
-            System.out.println("Employee response: " + employee);
-
-            if (employee.password.equals(dto.password)) {
-                roles.add("EMPLOYEE");
-                userId = employee.id;
-            }
-
-        } catch (Exception e) {
-            System.out.println("Employee ERROR:");
-            e.printStackTrace();
+            employee = userFeignClient.getEmployeeByLogin(dto.login);
+        } catch (feign.FeignException.NotFound e) {
+            employee = null;
+        } catch (feign.FeignException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Employee service error: " + e.getMessage()
+            );
         }
 
         try {
-            System.out.println("Calling client service...");
-            Client client = userFeignClient.getClientByLogin(dto.login);
-            System.out.println("Client response: " + client);
-
-            if (client.password.equals(dto.password)) {
-                roles.add("CLIENT");
-                userId = client.id;
-            }
-
-        } catch (Exception e) {
-            System.out.println("Client ERROR:");
-            e.printStackTrace();
+            client = userFeignClient.getClientByLogin(dto.login);
+        } catch (feign.FeignException.NotFound e) {
+            client = null;
+        } catch (feign.FeignException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Client service error: " + e.getMessage()
+            );
         }
 
-        System.out.println("Roles: " + roles);
+        if (employee != null && employee.password.equals(dto.password)) {
+            roles.add("EMPLOYEE");
+            userId = employee.id;
+        }
+
+        if (client != null && client.password.equals(dto.password)) {
+            roles.add("CLIENT");
+            userId = client.id;
+        }
 
         if (roles.isEmpty()) {
-            throw new RuntimeException("Invalid credentials");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid credentials"
+            );
         }
 
         String token = jwtService.generateToken(userId, dto.login, roles);
@@ -71,7 +79,7 @@ public class AuthService {
         AuthResponseDto responseDto = new AuthResponseDto();
         responseDto.setToken(token);
         responseDto.setUserId(userId);
-        responseDto.setUserType("CLIENT");
+        responseDto.setUserType(roles.contains("EMPLOYEE") ? "EMPLOYEE" : "CLIENT");
 
         return responseDto;
     }

@@ -11,6 +11,9 @@ spring:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  server:
+    error:
+      include-message: always
 
 server:
   port: 8083 #изменить на свой сервис: credit service(8084), info service(8085), core(8081)
