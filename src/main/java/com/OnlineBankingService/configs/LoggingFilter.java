@@ -31,32 +31,24 @@ public class LoggingFilter extends OncePerRequestFilter {
         } finally {
 
             long time = System.currentTimeMillis() - start;
-
             int status = response.getStatus();
 
             RequestMetrics.record(status);
 
-            double errorRate = RequestMetrics.getErrorRate();
-
             String traceId = MDC.get("traceId");
-            if (traceId == null) {
-                traceId = "NO_TRACE";
-            }
+            if (traceId == null) traceId = "NO_TRACE";
 
-            String log = String.format(
-                    "TRACE=%s METHOD=%s PATH=%s STATUS=%d TIME=%dms ERROR_RATE=%.2f%%",
-                    traceId,
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    status,
-                    time,
-                    errorRate
-            );
+            String log = "TRACE=" + traceId +
+                    " METHOD=" + request.getMethod() +
+                    " PATH=" + request.getRequestURI() +
+                    " STATUS=" + status +
+                    " TIME=" + time + "ms" +
+                    " ERROR_RATE=" + String.format("%.2f", RequestMetrics.getErrorRate()) + "%";
 
             System.out.println(log);
 
             try {
-                LogSender.send("auth-service", log);
+                LogSender.send("info-service", log);
             } catch (Exception ignored) {
             }
         }
