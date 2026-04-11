@@ -42,7 +42,7 @@ public class AuthService {
         } catch (feign.FeignException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_GATEWAY,
-                    "Employee service error: " + e.getMessage()
+                    "Employee service unavailable"
             );
         }
 
@@ -53,24 +53,39 @@ public class AuthService {
         } catch (feign.FeignException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_GATEWAY,
-                    "Client service error: " + e.getMessage()
+                    "Client service unavailable"
             );
         }
 
-        if (employee != null && employee.password.equals(dto.password)) {
-            roles.add("EMPLOYEE");
-            userId = employee.id;
+        boolean passwordMatched = false;
+
+        if (employee != null) {
+            if (employee.password.equals(dto.password)) {
+                roles.add("EMPLOYEE");
+                userId = employee.id;
+                passwordMatched = true;
+            }
         }
 
-        if (client != null && client.password.equals(dto.password)) {
-            roles.add("CLIENT");
-            userId = client.id;
+        if (client != null) {
+            if (client.password.equals(dto.password)) {
+                roles.add("CLIENT");
+                userId = client.id;
+                passwordMatched = true;
+            }
         }
 
-        if (roles.isEmpty()) {
+        if (employee == null && client == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User not found"
+            );
+        }
+
+        if (!passwordMatched) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
-                    "Invalid credentials"
+                    "Invalid password"
             );
         }
 
