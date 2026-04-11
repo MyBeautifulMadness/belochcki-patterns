@@ -30,6 +30,8 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.OnlineBankingService.kafka.command"
+  application:
+    name: core-service
 
 exchange-rate:
   api:
