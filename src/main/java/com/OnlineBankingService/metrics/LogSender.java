@@ -58,9 +58,13 @@ public class LogSender {
                     os.write(body.getBytes(StandardCharsets.UTF_8));
                 }
 
+                System.out.println(body);
+
                 conn.getResponseCode();
 
-            } catch (Exception ignored) {
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }).start();
     }
