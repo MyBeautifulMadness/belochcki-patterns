@@ -56,7 +56,7 @@ public class LoggingFilter extends OncePerRequestFilter {
             System.out.println(log);
 
             try {
-                LogSender.send("auth-service", log);
+                LogSender.send("credit-service", log);
             } catch (Exception ignored) {
             }
         }
