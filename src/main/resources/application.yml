@@ -16,6 +16,8 @@ spring:
       resourceserver:
         jwt:
           secret-key: MySuperSecretKeyThatIsLongEnough123456
+  application:
+    name: credit-service
 
 server:
   port: 8084 #credit service(8084), info service(8085), core(8081)
