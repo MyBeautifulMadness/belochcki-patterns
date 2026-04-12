@@ -57,3 +57,11 @@ CREATE TABLE processed_command (
     operation_id UUID PRIMARY KEY,
     processed_at TIMESTAMP NOT NULL
 );
+
+CREATE TABLE idempotency_record (
+    idempotency_key VARCHAR(255) PRIMARY KEY,
+    operation_name VARCHAR(100) NOT NULL,
+    response_status INT NOT NULL,
+    response_body text,
+    created_at TIMESTAMP NOT NULL DEFAULT now()
+);

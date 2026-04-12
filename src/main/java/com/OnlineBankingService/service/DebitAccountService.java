@@ -13,9 +13,9 @@ import java.util.UUID;
 public interface DebitAccountService {
     DebitAccountResponse open(UUID clientId, OpenDebitAccountRequest request);
 
-    DebitAccountResponse deposit(UUID accountId, MoneyRequest request, UUID clientId);
+    DebitAccountResponse deposit(UUID accountId, MoneyRequest request, UUID clientId, String idempotencyKey);
 
-    DebitAccountResponse withdraw(UUID accountId, MoneyRequest request, UUID clientId);
+    DebitAccountResponse withdraw(UUID accountId, MoneyRequest request, UUID clientId, String idempotencyKey);
 
     DebitAccountResponse close(UUID clientId, UUID accountId);
 
@@ -27,7 +27,7 @@ public interface DebitAccountService {
 
     DebitAccountResponse getById(UUID clientId, UUID accountId, Role role);
 
-    TransferResponse transfer(UUID clientId, TransferRequest request);
+    TransferResponse transfer(UUID clientId, TransferRequest request, String idempotencyKey);
 
     void processDepositCommand(DepositCommand command);
 

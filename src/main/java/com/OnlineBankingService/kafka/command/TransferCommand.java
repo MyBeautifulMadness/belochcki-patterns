@@ -9,6 +9,7 @@ public record TransferCommand(
         UUID fromAccountId,
         UUID toAccountId,
         BigDecimal amount,
-        String comment
+        String comment,
+        String idempotencyKey
 ) {
 }

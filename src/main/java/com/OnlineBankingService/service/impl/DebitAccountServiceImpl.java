@@ -22,6 +22,7 @@ import com.OnlineBankingService.repository.DebitAccountRepository;
 import com.OnlineBankingService.service.CurrencyService;
 import com.OnlineBankingService.service.DebitAccountService;
 import com.OnlineBankingService.service.ExchangeRateService;
+import com.OnlineBankingService.service.IdempotencyService;
 import com.OnlineBankingService.service.ws.AccountOperationWsPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -47,6 +48,7 @@ public class DebitAccountServiceImpl implements DebitAccountService {
     private final CurrencyService currencyService;
     private final ExchangeRateService exchangeRateService;
     private final AccountOperationWsPublisher wsPublisher;
+    private final IdempotencyService idempotencyService;
 
     @Override
     @Transactional
@@ -110,7 +112,16 @@ public class DebitAccountServiceImpl implements DebitAccountService {
 
     @Override
     @Transactional
-    public DebitAccountResponse deposit(UUID accountId, MoneyRequest request, UUID clientId) {
+    public DebitAccountResponse deposit(UUID accountId, MoneyRequest request, UUID clientId, String idempotencyKey) {
+        return idempotencyService.execute(
+                idempotencyKey,
+                "debitAccount.deposit",
+                DebitAccountResponse.class,
+                () -> doDeposit(accountId, request, clientId)
+        );
+    }
+
+    private DebitAccountResponse doDeposit(UUID accountId, MoneyRequest request, UUID clientId) {
         BigDecimal delta = normalizeAmount(request.amount());
 
         BigDecimal newBalance = accountRepository.applyDeltaReturningBalance(accountId, clientId, delta);
@@ -121,13 +132,25 @@ public class DebitAccountServiceImpl implements DebitAccountService {
 
         saveOperation(accountId, delta, request.comment(), OperationType.DEPOSIT);
 
-        var account = accountRepository.findById(accountId).orElseThrow(() -> new NotFoundException("Account not found"));
+        var account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Account not found"));
+
         return toResponse(account);
     }
 
+
     @Override
     @Transactional
-    public DebitAccountResponse withdraw(UUID accountId, MoneyRequest request, UUID clientId) {
+    public DebitAccountResponse withdraw(UUID accountId, MoneyRequest request, UUID clientId, String idempotencyKey) {
+        return idempotencyService.execute(
+                idempotencyKey,
+                "debitAccount.withdraw",
+                DebitAccountResponse.class,
+                () -> doWithdraw(accountId, request, clientId)
+        );
+    }
+
+    private DebitAccountResponse doWithdraw(UUID accountId, MoneyRequest request, UUID clientId) {
         BigDecimal delta = normalizeAmount(request.amount()).negate();
 
         BigDecimal newBalance = accountRepository.applyDeltaReturningBalance(accountId, clientId, delta);
@@ -138,7 +161,9 @@ public class DebitAccountServiceImpl implements DebitAccountService {
 
         saveOperation(accountId, delta.abs(), request.comment(), OperationType.WITHDRAW);
 
-        var account = accountRepository.findById(accountId).orElseThrow(() -> new NotFoundException("Account not found"));
+        var account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Account not found"));
+
         return toResponse(account);
     }
 
@@ -250,7 +275,16 @@ public class DebitAccountServiceImpl implements DebitAccountService {
 
     @Override
     @Transactional
-    public TransferResponse transfer(UUID clientId, TransferRequest request) {
+    public TransferResponse transfer(UUID clientId, TransferRequest request, String idempotencyKey) {
+        return idempotencyService.execute(
+                idempotencyKey,
+                "debitAccount.transfer",
+                TransferResponse.class,
+                () -> doTransfer(clientId, request)
+        );
+    }
+
+    private TransferResponse doTransfer(UUID clientId, TransferRequest request) {
         if (request.fromAccountId().equals(request.toAccountId())) {
             throw new ConflictException("Source and destination accounts must be different");
         }
@@ -350,7 +384,8 @@ public class DebitAccountServiceImpl implements DebitAccountService {
         deposit(
                 command.accountId(),
                 new MoneyRequest(command.amount(), command.comment()),
-                command.clientId()
+                command.clientId(),
+                extractOrGenerateIdempotencyKey(command.idempotencyKey())
         );
     }
 
@@ -360,7 +395,8 @@ public class DebitAccountServiceImpl implements DebitAccountService {
         withdraw(
                 command.accountId(),
                 new MoneyRequest(command.amount(), command.comment()),
-                command.clientId()
+                command.clientId(),
+                extractOrGenerateIdempotencyKey(command.idempotencyKey())
         );
     }
 
@@ -374,7 +410,8 @@ public class DebitAccountServiceImpl implements DebitAccountService {
                         command.toAccountId(),
                         command.amount(),
                         command.comment()
-                )
+                ),
+                extractOrGenerateIdempotencyKey(command.idempotencyKey())
         );
     }
 
@@ -394,6 +431,12 @@ public class DebitAccountServiceImpl implements DebitAccountService {
                 command.clientId(),
                 command.accountId()
         );
+    }
+
+    private String extractOrGenerateIdempotencyKey(String idempotencyKey) {
+        return idempotencyKey == null || idempotencyKey.isBlank()
+                ? UUID.randomUUID().toString()
+                : idempotencyKey;
     }
 
     private void ensureAccountExists(UUID accountId) {

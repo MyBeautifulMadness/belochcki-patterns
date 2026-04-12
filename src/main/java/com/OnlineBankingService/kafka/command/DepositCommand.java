@@ -8,6 +8,7 @@ public record DepositCommand(
         UUID clientId,
         UUID accountId,
         BigDecimal amount,
-        String comment
+        String comment,
+        String idempotencyKey
 ) {
 }

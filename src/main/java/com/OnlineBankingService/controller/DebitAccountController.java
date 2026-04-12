@@ -45,13 +45,14 @@ public class DebitAccountController {
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/deposit")
-    public ResponseEntity<Void> deposit(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request) {
+    public ResponseEntity<Void> deposit(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request, @RequestHeader("Idempotency-Key") String idempotencyKey) {
         DepositCommand command = new DepositCommand(
                 java.util.UUID.randomUUID(),
                 clientId,
                 accountId,
                 request.amount(),
-                request.comment()
+                request.comment(),
+                idempotencyKey
         );
 
         accountCommandProducer.sendDeposit(command);
@@ -59,13 +60,14 @@ public class DebitAccountController {
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/withdraw")
-    public ResponseEntity<Void> withdraw(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request) {
+    public ResponseEntity<Void> withdraw(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request, @RequestHeader("Idempotency-Key") String idempotencyKey) {
         WithdrawCommand command = new WithdrawCommand(
                 java.util.UUID.randomUUID(),
                 clientId,
                 accountId,
                 request.amount(),
-                request.comment()
+                request.comment(),
+                idempotencyKey
         );
 
         accountCommandProducer.sendWithdraw(command);
@@ -97,14 +99,15 @@ public class DebitAccountController {
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/transfer")
-    public ResponseEntity<Void> transfer(@PathVariable UUID clientId, @Valid @RequestBody TransferRequest request) {
+    public ResponseEntity<Void> transfer(@PathVariable UUID clientId, @Valid @RequestBody TransferRequest request, @RequestHeader("Idempotency-Key") String idempotencyKey) {
         TransferCommand command = new TransferCommand(
                 UUID.randomUUID(),
                 clientId,
                 request.fromAccountId(),
                 request.toAccountId(),
                 request.amount(),
-                request.comment()
+                request.comment(),
+                idempotencyKey
         );
 
         accountCommandProducer.sendTransfer(command);
