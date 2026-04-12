@@ -49,8 +49,7 @@ public class FaultInjectionFilter implements Filter {
             return;
         }
 
-        int minute = LocalDateTime.now().getMinute();
-        int errorRate = (minute % 2 == 0) ? 70 : 30;
+        int errorRate = (System.currentTimeMillis() / 60000 % 2 == 0) ? 70 : 30;
 
         if (random.nextInt(100) < errorRate) {
             writeErrorResponse(
