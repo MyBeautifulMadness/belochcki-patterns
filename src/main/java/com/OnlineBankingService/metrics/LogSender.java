@@ -54,6 +54,8 @@ public class LogSender {
                         time
                 );
 
+                System.out.println(errorRate);
+
                 try (OutputStream os = conn.getOutputStream()) {
                     os.write(body.getBytes(StandardCharsets.UTF_8));
                 }
