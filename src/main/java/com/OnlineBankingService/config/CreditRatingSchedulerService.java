@@ -29,38 +29,45 @@ import java.util.stream.Collectors;
 public class CreditRatingSchedulerService {
 
     private final RestTemplate restTemplateConfig;
+    private final RetryExecutor retryExecutor;
 
     private static final String CREDIT_OPERATION_HISTORY_URL = "http://localhost:8084/api/creditOperationHistory/getAll?operationType=REPAYMENT&direction=asc&page=0&size=1000";
-
     private static final String CLIENT_CREDIT_URL = "http://localhost:8084/api/clientCredit/getAll?direction=asc&page=0&size=1000";
-
     private static final String UPDATE_CREDIT_RATING_URL = "http://localhost:8082/api/clients/credit-rating";
 
-    @Scheduled(fixedRate = 60000) //60000
+    @Scheduled(fixedRate = 60000)
     @Transactional
-    public void updateClientCreditRatings(){
-
+    public void updateClientCreditRatings() {
         log.info("Началось обновление кредитных рейтингов");
 
-        ResponseEntity<CreditOperationHistoryPageResponse> historyResponse = restTemplateConfig.getForEntity(CREDIT_OPERATION_HISTORY_URL, CreditOperationHistoryPageResponse.class);
+        ResponseEntity<CreditOperationHistoryPageResponse> historyResponse = retryExecutor.execute(
+                () -> restTemplateConfig.getForEntity(CREDIT_OPERATION_HISTORY_URL, CreditOperationHistoryPageResponse.class),
+                "credit scheduler -> credit history load"
+        );
 
-        List<CreditOperationHistoryDto> histories = historyResponse.getBody() != null ? historyResponse.getBody().getData() : Collections.emptyList();
+        List<CreditOperationHistoryDto> histories =
+                historyResponse.getBody() != null ? historyResponse.getBody().getData() : Collections.emptyList();
 
         if (histories == null || histories.isEmpty()) {
             log.info("Нет иторий операций со статусом ПОПОЛНЕНИЕ");
             return;
         }
 
-        ResponseEntity<ClientCreditPageResponse> clientCreditResponse = restTemplateConfig.getForEntity(CLIENT_CREDIT_URL, ClientCreditPageResponse.class);
+        ResponseEntity<ClientCreditPageResponse> clientCreditResponse = retryExecutor.execute(
+                () -> restTemplateConfig.getForEntity(CLIENT_CREDIT_URL, ClientCreditPageResponse.class),
+                "credit scheduler -> credit load"
+        );
 
-        List<ClientCreditDto> clientCredits = clientCreditResponse.getBody() != null ? clientCreditResponse.getBody().getData() : Collections.emptyList();
+        List<ClientCreditDto> clientCredits =
+                clientCreditResponse.getBody() != null ? clientCreditResponse.getBody().getData() : Collections.emptyList();
 
         if (clientCredits == null || clientCredits.isEmpty()) {
             log.warn("Клиентские кредиты не найдены");
             return;
         }
 
-        Map<UUID, ClientCreditDto> clientCreditMap = clientCredits.stream().collect(Collectors.toMap(ClientCreditDto::getId, Function.identity()));
+        Map<UUID, ClientCreditDto> clientCreditMap = clientCredits.stream()
+                .collect(Collectors.toMap(ClientCreditDto::getId, Function.identity()));
 
         for (CreditOperationHistoryDto history : histories) {
             try {
@@ -88,7 +95,6 @@ public class CreditRatingSchedulerService {
                 }
 
                 LocalDateTime operationDateTime = LocalDateTime.of(operationDate, operationTime);
-
                 long minutesBetween = ChronoUnit.MINUTES.between(operationDateTime, LocalDateTime.now());
                 int ratingValue = minutesBetween >= 1 ? -10 : 10;
 
@@ -102,7 +108,10 @@ public class CreditRatingSchedulerService {
 
                 HttpEntity<UpdateCreditRatingRequest> entity = new HttpEntity<>(request, headers);
 
-                restTemplateConfig.put(UPDATE_CREDIT_RATING_URL, entity);
+                retryExecutor.executeVoid(
+                        () -> restTemplateConfig.put(UPDATE_CREDIT_RATING_URL, entity),
+                        "credit scheduler -> info update credit rating"
+                );
 
                 log.info("Кредитный рейтинг обновлен для ClientID={}, рейтинг={}", clientId, ratingValue);
 
@@ -112,6 +121,5 @@ public class CreditRatingSchedulerService {
         }
 
         log.info("Завершено обновление кредитных рейтингов клиентов");
-
     }
 }

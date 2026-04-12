@@ -1,15 +1,14 @@
 package com.OnlineBankingService.service.impl;
 
-import com.OnlineBankingService.config.RestTemplateConfig;
+import com.OnlineBankingService.config.RetryExecutor;
 import com.OnlineBankingService.entity.CreditOperationHistory;
 import com.OnlineBankingService.entity.dto.ClientCreditDebtResponse;
 import com.OnlineBankingService.entity.enums.OperationType;
 import com.OnlineBankingService.repository.CreditOperationHistoryRepository;
 import com.OnlineBankingService.service.ClientCreditRatingService;
-import com.OnlineBankingService.service.ClientCreditService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,18 +25,22 @@ public class ClientCreditRatingServiceImpl implements ClientCreditRatingService 
 
     private final RestTemplate restTemplateConfig;
     private final CreditOperationHistoryRepository creditOperationHistoryRepository;
+    private final RetryExecutor retryExecutor;
 
     @Override
     public Integer getClientCreditRating(UUID clientId) {
         String url = "http://localhost:8082/api/clients/credit-rating?id=" + clientId;
 
-        ResponseEntity<Integer> response = restTemplateConfig.getForEntity(url, Integer.class);
+        ResponseEntity<Integer> response = retryExecutor.execute(
+                () -> restTemplateConfig.getForEntity(url, Integer.class),
+                "credit -> info get client credit rating"
+        );
 
         return response.getBody();
     }
+
     @Override
     public List<ClientCreditDebtResponse> getClientCreditDebts(UUID clientId, UUID creditId) {
-
         Sort sort = Sort.by(Sort.Order.desc("date"), Sort.Order.desc("time"));
 
         List<CreditOperationHistory> operations;
@@ -82,5 +85,4 @@ public class ClientCreditRatingServiceImpl implements ClientCreditRatingService 
                         .build())
                 .toList();
     }
-
 }
