@@ -48,21 +48,23 @@ public class CoreGatewayController {
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/deposit")
     public AccountDto deposit(
             @RequestHeader("Authorization") String authorization,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
             @PathVariable UUID clientId,
             @PathVariable UUID accountId,
             @Valid @RequestBody MoneyRequest request
     ) {
-        return gatewayService.deposit(extractToken(authorization), clientId, accountId, request);
+        return gatewayService.deposit(extractToken(authorization), idempotencyKey, clientId, accountId, request);
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/withdraw")
     public AccountDto withdraw(
             @RequestHeader("Authorization") String authorization,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
             @PathVariable UUID clientId,
             @PathVariable UUID accountId,
             @Valid @RequestBody MoneyRequest request
     ) {
-        return gatewayService.withdraw(extractToken(authorization), clientId, accountId, request);
+        return gatewayService.withdraw(extractToken(authorization), idempotencyKey, clientId, accountId, request);
     }
 
     @GetMapping("/clients/{clientId}/debit-accounts")
@@ -136,8 +138,8 @@ public class CoreGatewayController {
     }
 
     @PostMapping("/clients/{clientId}/debit-accounts/transfer")
-    TransferResponse transfer(@PathVariable UUID clientId, @Valid @RequestBody TransferRequest request){
-        return gatewayService.transfer(clientId, request);
+    TransferResponse transfer( @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey, @PathVariable UUID clientId, @Valid @RequestBody TransferRequest request){
+        return gatewayService.transfer(idempotencyKey, clientId, request);
     }
 
     @GetMapping("/currencies")

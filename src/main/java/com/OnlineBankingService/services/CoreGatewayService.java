@@ -43,16 +43,20 @@ public class CoreGatewayService {
         );
     }
 
-    public AccountDto deposit(String token, UUID clientId, UUID accountId, MoneyRequest request) {
+    public AccountDto deposit(String token, String idempotencyKey, UUID clientId, UUID accountId, MoneyRequest request) {
+        String key = ensureIdempotencyKey(idempotencyKey);
+
         return retryExecutor.execute(
-                () -> coreClient.deposit(clientId, accountId, request),
+                () -> coreClient.deposit(key, clientId, accountId, request),
                 "gateway -> core deposit"
         );
     }
 
-    public AccountDto withdraw(String token, UUID clientId, UUID accountId, MoneyRequest request) {
+    public AccountDto withdraw(String token, String idempotencyKey, UUID clientId, UUID accountId, MoneyRequest request) {
+        String key = ensureIdempotencyKey(idempotencyKey);
+
         return retryExecutor.execute(
-                () -> coreClient.withdraw(clientId, accountId, request),
+                () -> coreClient.withdraw(key, clientId, accountId, request),
                 "gateway -> core withdraw"
         );
     }
@@ -144,9 +148,11 @@ public class CoreGatewayService {
         );
     }
 
-    public TransferResponse transfer(@PathVariable UUID clientId, @Valid @RequestBody TransferRequest request) {
+    public TransferResponse transfer(String idempotencyKey, @PathVariable UUID clientId, @Valid @RequestBody TransferRequest request) {
+        String key = ensureIdempotencyKey(idempotencyKey);
+
         return retryExecutor.execute(
-                () -> coreClient.transfer(clientId, request),
+                () -> coreClient.transfer(key, clientId, request),
                 "gateway -> core transfer"
         );
     }
@@ -205,5 +211,11 @@ public class CoreGatewayService {
                 () -> coreClient.internalDeposit(request),
                 "gateway -> core internal deposit to master account"
         );
+    }
+
+    private String ensureIdempotencyKey(String idempotencyKey) {
+        return idempotencyKey == null || idempotencyKey.isBlank()
+                ? UUID.randomUUID().toString()
+                : idempotencyKey;
     }
 }

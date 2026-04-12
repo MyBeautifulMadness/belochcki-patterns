@@ -21,10 +21,10 @@ public interface CoreClient {
     AccountDto closeAccount(@PathVariable UUID clientId, @PathVariable UUID accountId);
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/deposit")
-    AccountDto deposit(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request);
+    AccountDto deposit(@RequestHeader("Idempotency-Key") String idempotencyKey, @PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request);
 
     @PostMapping("/clients/{clientId}/debit-accounts/{accountId}/withdraw")
-    AccountDto withdraw(@PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request);
+    AccountDto withdraw(@RequestHeader("Idempotency-Key") String idempotencyKey, @PathVariable UUID clientId, @PathVariable UUID accountId, @Valid @RequestBody MoneyRequest request);
 
     @GetMapping("/clients/{clientId}/debit-accounts")
     List<AccountDto> getByClient(@PathVariable UUID clientId);
@@ -56,7 +56,7 @@ public interface CoreClient {
     PagedResponse<AccountOperationResponse> operationsCredit(@PathVariable UUID clientId, @PathVariable UUID accountId, Pageable pageable);
 
     @PostMapping("/clients/{clientId}/debit-accounts/transfer")
-    TransferResponse transfer(@PathVariable UUID clientId, @Valid @RequestBody TransferRequest request);
+    TransferResponse transfer(@RequestHeader("Idempotency-Key") String idempotencyKey, @PathVariable UUID clientId, @Valid @RequestBody TransferRequest request);
 
     @GetMapping("/currencies")
     List<CurrencyResponse> getAll();
