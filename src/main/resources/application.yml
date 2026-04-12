@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/info_service_db #изменить адрес на свой
     username: postgres
-    password: V
+    password: 3141
   jpa:
     hibernate:
       ddl-auto: update
