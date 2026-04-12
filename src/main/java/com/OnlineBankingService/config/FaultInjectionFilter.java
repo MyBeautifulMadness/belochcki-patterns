@@ -1,6 +1,8 @@
 package com.OnlineBankingService.config;
 
+import com.OnlineBankingService.entity.dto.ErrorResponse;
 import com.OnlineBankingService.metrics.RequestMetrics;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +18,7 @@ import java.util.Random;
 public class FaultInjectionFilter implements Filter {
 
     private final Random random = new Random();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -45,8 +48,12 @@ public class FaultInjectionFilter implements Filter {
         }
 
         if (RequestMetrics.isCircuitOpen()) {
-            response.setStatus(503);
-            response.getWriter().write("Circuit Breaker OPEN");
+            writeErrorResponse(
+                    response,
+                    HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                    "Service Unavailable",
+                    "Circuit Breaker OPEN"
+            );
             return;
         }
 
@@ -54,10 +61,33 @@ public class FaultInjectionFilter implements Filter {
         int errorRate = (minute % 2 == 0) ? 70 : 30;
 
         if (random.nextInt(100) < errorRate) {
-            response.setStatus(500);
+            writeErrorResponse(
+                    response,
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Internal Server Error",
+                    "Simulation of a system failure"
+            );
             return;
         }
 
         chain.doFilter(req, res);
+    }
+
+    private void writeErrorResponse(HttpServletResponse response,
+                                    int status,
+                                    String error,
+                                    String message) throws IOException {
+
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(status)
+                .error(error)
+                .message(message)
+                .build();
+
+        objectMapper.writeValue(response.getWriter(), errorResponse);
     }
 }
