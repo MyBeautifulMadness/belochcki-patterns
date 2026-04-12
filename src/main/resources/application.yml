@@ -19,6 +19,13 @@ spring:
   server:
     error:
       include-message: always
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 1000
+            readTimeout: 2000
 
 server:
   port: 8085 #изменить на свой сервис: credit service(8084), info service(8085), core(8081)
