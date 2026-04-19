@@ -6,6 +6,7 @@ import com.OnlineBankingService.entity.dto.AuthValidationRequest;
 import com.OnlineBankingService.entity.dto.CreditTariffRequest;
 import com.OnlineBankingService.entity.dto.CreditTariffResponse;
 import com.OnlineBankingService.entity.dto.DeleteCreditTariffRequest;
+import com.OnlineBankingService.notifications.NotificationService;
 import com.OnlineBankingService.repository.CreditTariffRepository;
 import com.OnlineBankingService.service.CreditTariffService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class CreditTariffServiceImpl implements CreditTariffService {
 
     private final CreditTariffRepository creditTariffRepository;
     private final RestTemplate restTemplateConfig;
+    private final NotificationService pushService;
 
     @Override
     public CreditTariffResponse createCreditTariff (CreditTariffRequest request) {
@@ -45,6 +47,9 @@ public class CreditTariffServiceImpl implements CreditTariffService {
 
         CreditTariff result = creditTariffRepository.save(creditTariff);
 
+        //pushService.sendToUser(request.getClientId(), "{\"title\":\"Новая операция\",\"body\":\"Данные о кредите изменились\"}");
+        pushService.sendToAll("{\"title\":\"Операция\",\"body\":\"Создан кредитный тариф\"}");
+
         return CreditTariffResponse.builder()
                 .id(result.getId())
                 .name(result.getName())
@@ -57,6 +62,8 @@ public class CreditTariffServiceImpl implements CreditTariffService {
 
     @Override
     public void deleteCreditTariff (UUID id, DeleteCreditTariffRequest request){
+
+        pushService.sendToAll("{\"title\":\"Операция\",\"body\":\"Удален кредитный тариф\"}");
 
         creditTariffRepository.deleteById(id);
     }
@@ -150,6 +157,8 @@ public class CreditTariffServiceImpl implements CreditTariffService {
         creditTariff.setInterestRate(request.getInterestRate());
 
         CreditTariff updetedCreditTariff = creditTariffRepository.save(creditTariff);
+
+        pushService.sendToAll("{\"title\":\"Операция\",\"body\":\"Обновлен кредитный тариф\"}");
 
         return CreditTariffResponse.builder()
                 .id(updetedCreditTariff.getId())

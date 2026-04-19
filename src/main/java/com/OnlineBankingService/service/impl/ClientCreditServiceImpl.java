@@ -7,6 +7,7 @@ import com.OnlineBankingService.entity.CreditTariff;
 import com.OnlineBankingService.entity.dto.*;
 import com.OnlineBankingService.entity.enums.CreditStatus;
 import com.OnlineBankingService.entity.enums.OperationType;
+import com.OnlineBankingService.notifications.NotificationService;
 import com.OnlineBankingService.repository.ClientCreditRepository;
 import com.OnlineBankingService.repository.CreditOperationHistoryRepository;
 import com.OnlineBankingService.repository.CreditTariffRepository;
@@ -48,6 +49,7 @@ public class ClientCreditServiceImpl implements ClientCreditService {
     private final RestTemplate restTemplateConfig;
     private final CreditOperationHistoryRepository creditOperationHistoryRepository;
     private final RetryExecutor retryExecutor;
+    private final NotificationService pushService;
 
     @Override
     @Transactional
@@ -95,6 +97,8 @@ public class ClientCreditServiceImpl implements ClientCreditService {
                 .build();
 
         creditOperationHistoryRepository.save(history);
+        pushService.sendToUser(request.getClientId(), "{\"title\":\"Новая операция\",\"body\":\"Создан новый кредит клиента\"}");
+        pushService.sendToAll("{\"title\":\"Операция\",\"body\":\"Создан новый кредит клиента\"}");
 
         return ClientCreditResponse.builder()
                 .id(result.getId())
@@ -329,6 +333,9 @@ public class ClientCreditServiceImpl implements ClientCreditService {
                 );
             }
         }
+
+        pushService.sendToUser(request.getClientId(), "{\"title\":\"Новая операция\",\"body\":\"Данные о кредите изменились\"}");
+        pushService.sendToAll("{\"title\":\"Операция\",\"body\":\"Данные о кредите изменились\"}");
 
     }
 

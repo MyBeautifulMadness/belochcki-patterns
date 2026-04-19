@@ -21,3 +21,8 @@ spring:
 
 server:
   port: 8084 #credit service(8084), info service(8085), core(8081)
+
+vapid:
+  publicKey: BEiA_n8BZKZ6Tt_C13sbpMwsr93IHW8M1svVjpos73Y0ycm_fbXZK7byS6Y6DxKdw5CKzfjgnuXh1b9h7CttYss
+  privateKey: 3xMDVK05-sa7L0WriuZqC2gg1tlcJFylVy3wNID2_AE
+  subject: mailto:example@mail.com

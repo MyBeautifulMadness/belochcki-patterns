@@ -1,10 +1,14 @@
 package com.OnlineBankingService.config;
 
+import jakarta.annotation.PostConstruct;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.security.Security;
 
 @Configuration
 @EnableMethodSecurity
@@ -59,5 +63,12 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    @PostConstruct
+    public void init() {
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
     }
 }
