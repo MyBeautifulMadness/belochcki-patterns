@@ -19,11 +19,13 @@ public class AuthService {
 
     private final UserClient userFeignClient;
     private final JwtService jwtService;
+    private final NotificationService pushService;
 
     public AuthService(UserClient userFeignClient,
-                       JwtService jwtService) {
+                       JwtService jwtService, NotificationService pushService) {
         this.userFeignClient = userFeignClient;
         this.jwtService = jwtService;
+        this.pushService = pushService;
     }
 
 
@@ -95,6 +97,9 @@ public class AuthService {
         responseDto.setToken(token);
         responseDto.setUserId(userId);
         responseDto.setUserType(roles.contains("EMPLOYEE") ? "EMPLOYEE" : "CLIENT");
+
+        pushService.sendToUser(userId, "{\"title\":\"Новая операция\",\"body\":\"Создана операция\"}");
+        pushService.sendToAll("{\"title\":\"Операция\",\"body\":\"Новая операция в системе\"}");
 
         return responseDto;
     }

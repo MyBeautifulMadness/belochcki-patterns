@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/info_service_db #изменить адрес на свой
     username: postgres
-    password: 3141
+    password: V
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,6 +16,11 @@ spring:
       include-message: always
   application:
     name: auth-service
+
+vapid:
+  publicKey: BEiA_n8BZKZ6Tt_C13sbpMwsr93IHW8M1svVjpos73Y0ycm_fbXZK7byS6Y6DxKdw5CKzfjgnuXh1b9h7CttYss
+  privateKey: 3xMDVK05-sa7L0WriuZqC2gg1tlcJFylVy3wNID2_AE
+  subject: mailto:example@mail.com
 
 server:
   port: 8083 #изменить на свой сервис: credit service(8084), info service(8085), core(8081)
